@@ -1,39 +1,57 @@
 import {
   createRouter,
   createRootRoute,
-  Route,
+  createRoute,
 } from '@tanstack/react-router';
 
-// Import your components
-import App from './App'; // Your root layout
+import App from './App';
+import AppLayout from './layouts/AppLayout';
+import AuthLayout from './layouts/AuthLayout';
 import Home from './views/Home';
+import Dashboard from './views/Dashboard';
 import Login from './views/Login';
 
-// 1. Create a root route
 const rootRoute = createRootRoute({
   component: App,
 });
 
-// 2. Create your child routes
-const homeRoute = new Route({
+const appLayoutRoute = createRoute({
   getParentRoute: () => rootRoute,
+  id: 'app-layout',
+  component: AppLayout,
+});
+
+const authLayoutRoute = createRoute({
+  getParentRoute: () => rootRoute,
+  id: 'auth-layout',
+  component: AuthLayout,
+});
+
+const homeRoute = createRoute({
+  getParentRoute: () => appLayoutRoute,
   path: '/',
   component: Home,
 });
 
-const loginRoute = new Route({
-  getParentRoute: () => rootRoute, // <-- This is the corrected line
+const dashboardRoute = createRoute({
+  getParentRoute: () => appLayoutRoute,
+  path: '/dashboard',
+  component: Dashboard,
+});
+
+const loginRoute = createRoute({
+  getParentRoute: () => authLayoutRoute,
   path: '/login',
   component: Login,
 });
 
-// 3. Create the route tree
-const routeTree = rootRoute.addChildren([homeRoute, loginRoute]);
+const routeTree = rootRoute.addChildren([
+  appLayoutRoute.addChildren([homeRoute, dashboardRoute]),
+  authLayoutRoute.addChildren([loginRoute]),
+]);
 
-// 4. Create the router instance
 export const router = createRouter({ routeTree });
 
-// 5. Register the router for typesafety
 declare module '@tanstack/react-router' {
   interface Register {
     router: typeof router;
