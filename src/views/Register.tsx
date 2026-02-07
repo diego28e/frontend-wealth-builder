@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { Link } from '@tanstack/react-router';
 
-export default function Login() {
+export default function Register() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
 
@@ -13,7 +13,7 @@ export default function Login() {
 
   return (
     <div className="bg-white rounded-lg shadow-xl p-8">
-      <h2 className="text-2xl font-bold text-gray-900 mb-6">Sign In</h2>
+      <h2 className="text-2xl font-bold text-gray-900 mb-6">Register</h2>
       
       <form onSubmit={handleSubmit} className="space-y-4">
         <div>
@@ -55,7 +55,7 @@ export default function Login() {
       </form>
 
       <p className="text-center text-sm text-gray-600 mt-6">
-        Don't have an account? <Link to='/register' className="text-emerald-600 font-medium cursor-pointer hover:underline">Sign up</Link>
+        Don't have an account? <Link to='/login' className="text-emerald-600 font-medium cursor-pointer hover:underline">Sign in</Link>
       </p>
     </div>
   );

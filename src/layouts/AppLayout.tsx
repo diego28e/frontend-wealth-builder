@@ -1,4 +1,4 @@
-import { Link, Outlet } from '@tanstack/react-router';
+import { Link, Outlet } from "@tanstack/react-router";
 
 export default function AppLayout() {
   return (
@@ -8,7 +8,11 @@ export default function AppLayout() {
           <div className="flex justify-between h-16">
             <div className="flex items-center space-x-8">
               <Link to="/" className="text-2xl font-bold text-emerald-600">
-                WealthBuilder
+                <img
+                  className="w-64 mx-auto"
+                  src="wealth-builder-isologo.png"
+                  alt="logo"
+                />
               </Link>
               <div className="hidden md:flex space-x-4">
                 <Link
@@ -22,6 +26,18 @@ export default function AppLayout() {
                   className="px-3 py-2 rounded-md text-sm font-medium text-gray-700 hover:text-emerald-600 hover:bg-gray-50"
                 >
                   Dashboard
+                </Link>
+                <Link
+                  to="/register"
+                  className="px-3 py-2 rounded-md text-sm font-medium text-gray-700 hover:text-emerald-600 hover:bg-gray-50"
+                >
+                  Register
+                </Link>
+                <Link
+                  to="/about"
+                  className="px-3 py-2 rounded-md text-sm font-medium text-gray-700 hover:text-emerald-600 hover:bg-gray-50"
+                >
+                  About
                 </Link>
               </div>
             </div>
