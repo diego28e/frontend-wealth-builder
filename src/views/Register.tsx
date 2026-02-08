@@ -8,7 +8,7 @@ export default function Register() {
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     // Auth logic will be implemented later
-    console.log('Login:', { email, password });
+    console.log('Register:', { email });
   };
 
   return (
