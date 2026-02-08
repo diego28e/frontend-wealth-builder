@@ -1,4 +1,4 @@
-import { createContext, useContext, useState, type ReactNode } from 'react';
+import { createContext, useContext, useState, useEffect, type ReactNode } from 'react';
 import { authService } from '../services/auth';
 import type { User, LoginRequest, RegisterRequest } from '../types/api';
 import { ApiError } from '../lib/api';
@@ -15,9 +15,24 @@ const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 export function AuthProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
-  const [isLoading, setIsLoading] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
+
+  useEffect(()=> {
+    async function checkSession() {
+        try {
+            const response = await authService.getMe();
+            setUser(response.user);
+        } catch (error) {
+            setUser(null);
+        }finally{
+            setIsLoading(false)
+        }
+    }
+    checkSession();
+},[])
 
   async function login(credentials: LoginRequest) {
+    setIsLoading(true);
     try {
       const response = await authService.login(credentials);
       setUser(response.user);
@@ -26,6 +41,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         throw new Error(error.message);
       }
       throw new Error('Login failed');
+    } finally {
+      setIsLoading(false);
     }
   }
 

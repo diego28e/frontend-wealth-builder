@@ -12,6 +12,7 @@ import Dashboard from "./views/Dashboard";
 import Login from "./views/Login";
 import Register from "./views/Register";
 import About from "./views/About";
+import { ProtectedRoute} from './components/ProtectedRoute';
 
 const rootRoute = createRootRoute({
   component: App,
@@ -20,7 +21,11 @@ const rootRoute = createRootRoute({
 const appLayoutRoute = createRoute({
   getParentRoute: () => rootRoute,
   id: "app-layout",
-  component: AppLayout,
+  component:()=> (
+    <ProtectedRoute>
+      <AppLayout />
+    </ProtectedRoute>
+  ),
 });
 
 const authLayoutRoute = createRoute({
@@ -34,10 +39,6 @@ const homeRoute = createRoute({
   path: "/",
   component: Home,
 });
-
-type DashboardSearch = {
-  filter?: "income" | "expense";
-};
 
 const dashboardRoute = createRoute({
   getParentRoute: () => appLayoutRoute,

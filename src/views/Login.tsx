@@ -24,8 +24,6 @@ export default function Login() {
     } finally {
         setIsSubmitting(false);
     }
-    // Auth logic will be implemented later
-    console.log('Login:', { email, password });
   };
 
   return (

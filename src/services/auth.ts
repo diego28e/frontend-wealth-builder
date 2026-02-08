@@ -19,6 +19,11 @@ export const authService = {
             method:'POST',
         });
     },
+    async getMe(): Promise<AuthResponse> {
+        return apiClient<AuthResponse>('/me', {
+            method: 'GET',
+        });
+    },
     async refreshToken(): Promise<void> {
         await apiClient('/refresh-token',{
             method:'POST',
