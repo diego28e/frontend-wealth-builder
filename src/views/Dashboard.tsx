@@ -1,5 +1,6 @@
 import { Calendar, Plus } from 'lucide-react';
 import StatCards from '../components/dashboard/StatCards';
+import  TransactionsTable from '../components/dashboard/TransactionsTable';
 
 export default function Dashboard() {
   return (
@@ -31,10 +32,7 @@ export default function Dashboard() {
         <p className="text-text-secondary">Budget Breakdown & Insights will go here</p>
       </div>
 
-      <div className="bg-surface-light rounded-xl p-6 border border-border-color">
-        <h3 className="text-xl font-semibold text-text-main mb-4">Recent Transactions</h3>
-        <p className="text-text-secondary">Transactions table will go here</p>
-      </div>
+      <TransactionsTable />
 
       {/* Footer */}
       <footer className="mt-8 text-center text-xs text-gray-400 font-medium">
