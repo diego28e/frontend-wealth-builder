@@ -6,7 +6,7 @@ export default function DashboardLayout() {
     return (
         <div className="bg-background-light min-h-screen flex overflow-hidden">
             <Sidebar />
-            <main className="flex-1 flex-col h-screen overflow-hidden">
+            <main className="flex-1 flex flex-col h-screen overflow-hidden">
             {/* Mobile Header */}
             <header className="flex lg:hidden items-center justify-between p-4 border-b border-border-color bg-surface-light sticky top-0 z-20">
                           <div className="flex items-center gap-2">

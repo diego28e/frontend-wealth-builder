@@ -1,46 +1,27 @@
-import {ArrowUpRight, ArrowDownRight} from 'lucide-react';
+import { ArrowUpRight, ArrowDownRight } from 'lucide-react';
+import type { Transaction } from '../../types/api';
 
-export default function TransactionsTable() {
+interface TransactionsTableProps {
+  transactions: Transaction[];
+  getCategoryName: (categoryId: string) => string;
+}
 
-    const transactions = [
-        {
-            id:'1',
-            description: 'Salary Deposit',
-            merchant: 'OCW',
-            amount: 5000,
-            type: 'Income' as const,
-            date: '2026-02-01',
-            category: 'Salary',
-        },
-    {
-      id: '2',
-      description: 'Grocery Shopping',
-      merchant: 'Supermarket',
-      amount: -120.50,
-      type: 'Expense' as const,
-      date: '2024-02-07',
-      category: 'Food',
-    },
-    {
-      id: '3',
-      description: 'Freelance Project',
-      merchant: 'Client XYZ',
-      amount: 1500,
-      type: 'Income' as const,
-      date: '2024-02-06',
-      category: 'Freelance',
-    },
-    {
-      id: '4',
-      description: 'Electric Bill',
-      merchant: 'Utility Co.',
-      amount: -85.00,
-      type: 'Expense' as const,
-      date: '2024-02-05',
-      category: 'Utilities',
-    },
-    ]
+export default function TransactionsTable({ transactions, getCategoryName }: TransactionsTableProps) {
+  if (transactions.length === 0) {
     return (
+      <div className="bg-surface-light rounded-xl border border-border-color overflow-hidden">
+        <div className="p-6 border-b border-border-color">
+          <h3 className="text-xl font-semibold text-text-main">Recent Transactions</h3>
+          <p className="text-sm text-text-secondary mt-1">Your latest financial activity</p>
+        </div>
+        <div className="p-8 text-center">
+          <p className="text-text-secondary">No transactions yet. Start tracking your finances!</p>
+        </div>
+      </div>
+    );
+  }
+
+  return (
     <div className="bg-surface-light rounded-xl border border-border-color overflow-hidden">
       <div className="p-6 border-b border-border-color">
         <h3 className="text-xl font-semibold text-text-main">Recent Transactions</h3>
@@ -85,13 +66,13 @@ export default function TransactionsTable() {
                     </div>
                     <div>
                       <div className="font-medium text-text-main">{tx.description}</div>
-                      <div className="text-sm text-text-secondary">{tx.merchant}</div>
+                      <div className="text-sm text-text-secondary">{tx.merchant_name || 'N/A'}</div>
                     </div>
                   </div>
                 </td>
                 <td className="px-6 py-4">
                   <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-800">
-                    {tx.category}
+                    {getCategoryName(tx.category_id)}
                   </span>
                 </td>
                 <td className="px-6 py-4 text-sm text-text-secondary">
@@ -107,7 +88,7 @@ export default function TransactionsTable() {
                       tx.type === 'Income' ? 'text-green-600' : 'text-red-600'
                     }`}
                   >
-                    {tx.amount > 0 ? '+' : ''}${Math.abs(tx.amount).toFixed(2)}
+                    {tx.amount > 0 ? '+' : ''}{tx.currency_code} {Math.abs(tx.amount).toFixed(2)}
                   </span>
                 </td>
               </tr>

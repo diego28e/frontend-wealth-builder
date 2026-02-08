@@ -2,7 +2,7 @@ import {apiClient} from '../lib/api';
 import type {Transaction, CreateTransactionRequest} from '../types/api';
 
 export const transactionService = {
-    async getUserTransacions(userId: string): Promise<Transaction[]> {
+    async getUserTransactions(userId: string): Promise<Transaction[]> {
         return apiClient<Transaction[]>(`/users/${userId}/transactions`);
     },
     async getTransactionById(id:string):Promise<Transaction> {

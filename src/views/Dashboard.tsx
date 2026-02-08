@@ -1,10 +1,17 @@
 import { Calendar, Plus } from 'lucide-react';
 import StatCards from '../components/dashboard/StatCards';
-import  TransactionsTable from '../components/dashboard/TransactionsTable';
+import TransactionsTable from '../components/dashboard/TransactionsTable';
 import BudgetBreakdown from '../components/dashboard/BudgetBreakdown';
 import InsightsCard from '../components/dashboard/InsightsCard';
+import { useTransactions } from '../hooks/useTransactions';
+import { useCategories } from '../hooks/useCategories';
+import { useAuth } from '../contexts/AuthContext';
 
 export default function Dashboard() {
+  const { user } = useAuth();
+  const { transactions, isLoading, error } = useTransactions();
+  const { getCategoryName } = useCategories();
+
   return (
     <div className="space-y-8">
       {/* Header Section */}
@@ -12,7 +19,7 @@ export default function Dashboard() {
         <div>
           <h2 className="text-3xl font-extrabold tracking-tight text-text-main">Dashboard</h2>
           <p className="text-text-secondary mt-1 font-medium">
-            Welcome back. Here is your financial health at a glance.
+            Welcome back, {user?.first_name || ''}. Here is your financial health at a glance.
           </p>
         </div>
         <div className="flex gap-3">
@@ -29,18 +36,18 @@ export default function Dashboard() {
 
       <StatCards />
 
-      {/* Placeholder for other components */}
+      {/* Budget Breakdown & Insights */}
       <div className='grid grid-cols-1 lg:grid-cols-3 gap-6'>
         <div className='lg:col-span-2'>
-          <BudgetBreakdown/>
+          <BudgetBreakdown transactions={transactions} getCategoryName={getCategoryName} />
         </div>
         <div className='lg:col-span-1'>
-          <InsightsCard/>
+          <InsightsCard />
         </div>
       </div>
 
 
-      <TransactionsTable />
+      <TransactionsTable transactions={transactions} getCategoryName={getCategoryName} />
 
       {/* Footer */}
       <footer className="mt-8 text-center text-xs text-gray-400 font-medium">
