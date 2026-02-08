@@ -7,6 +7,7 @@ import {
 import App from "./App";
 import AppLayout from "./layouts/AppLayout";
 import AuthLayout from "./layouts/AuthLayout";
+import DashboardLayout from "./layouts/DashboardLayout";
 import Home from "./views/Home";
 import Dashboard from "./views/Dashboard";
 import Login from "./views/Login";
@@ -28,6 +29,18 @@ const appLayoutRoute = createRoute({
   ),
 });
 
+const dashboardLayoutRoute = createRoute({
+  getParentRoute: () => rootRoute,
+  id: "dashboard-layout",
+  component: ()=> {
+    return (
+      <ProtectedRoute>
+        <DashboardLayout />
+      </ProtectedRoute>
+    )
+  }
+})
+
 const authLayoutRoute = createRoute({
   getParentRoute: () => rootRoute,
   id: "auth-layout",
@@ -41,7 +54,7 @@ const homeRoute = createRoute({
 });
 
 const dashboardRoute = createRoute({
-  getParentRoute: () => appLayoutRoute,
+  getParentRoute: () => dashboardLayoutRoute,
   path: "/dashboard",
   component: Dashboard,
 });
@@ -67,6 +80,7 @@ const aboutRoute = createRoute({
 const routeTree = rootRoute.addChildren([
   appLayoutRoute.addChildren([homeRoute, dashboardRoute, aboutRoute]),
   authLayoutRoute.addChildren([loginRoute, registerRoute]),
+  dashboardLayoutRoute.addChildren([dashboardRoute])
 ]);
 
 export const router = createRouter({ routeTree });
