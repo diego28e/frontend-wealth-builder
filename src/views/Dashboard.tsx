@@ -1,51 +1,45 @@
+import { Calendar, Plus } from 'lucide-react';
+import StatCards from '../components/dashboard/StatCards';
+
 export default function Dashboard() {
   return (
-    <div className="space-y-6">
-      <div>
-        <h1 className="text-3xl font-bold text-gray-900">Dashboard</h1>
-        <p className="text-gray-600 mt-1">Track your financial health</p>
-      </div>
-
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-        <div className="bg-white rounded-lg shadow p-6 border border-gray-200">
-          <div className="text-sm font-medium text-gray-600">Total Balance</div>
-          <div className="text-3xl font-bold text-gray-900 mt-2">$12,450.00</div>
-          <div className="text-sm text-green-600 mt-2">+12.5% from last month</div>
+    <div className="space-y-8">
+      {/* Header Section */}
+      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+        <div>
+          <h2 className="text-3xl font-extrabold tracking-tight text-text-main">Dashboard</h2>
+          <p className="text-text-secondary mt-1 font-medium">
+            Welcome back. Here is your financial health at a glance.
+          </p>
         </div>
-
-        <div className="bg-white rounded-lg shadow p-6 border border-gray-200">
-          <div className="text-sm font-medium text-gray-600">Income</div>
-          <div className="text-3xl font-bold text-green-600 mt-2">$8,200.00</div>
-          <div className="text-sm text-gray-600 mt-2">This month</div>
-        </div>
-
-        <div className="bg-white rounded-lg shadow p-6 border border-gray-200">
-          <div className="text-sm font-medium text-gray-600">Expenses</div>
-          <div className="text-3xl font-bold text-red-600 mt-2">$3,750.00</div>
-          <div className="text-sm text-gray-600 mt-2">This month</div>
+        <div className="flex gap-3">
+          <button className="px-4 py-2.5 bg-surface-light border border-border-color rounded-xl text-sm font-bold shadow-sm hover:bg-gray-50 transition-colors flex items-center gap-2 text-text-main">
+            <Calendar size={16} className="text-gray-500" />
+            Oct 2023
+          </button>
+          <button className="px-5 py-2.5 bg-primary text-white rounded-xl text-sm font-bold shadow-lg shadow-green-500/30 hover:bg-primary-hover transition-all flex items-center gap-2 transform active:scale-95">
+            <Plus size={18} strokeWidth={3} />
+            Add Transaction
+          </button>
         </div>
       </div>
 
-      <div className="bg-white rounded-lg shadow p-6 border border-gray-200">
-        <h2 className="text-xl font-semibold text-gray-900 mb-4">Recent Transactions</h2>
-        <div className="space-y-3">
-          {[
-            { name: 'Salary Deposit', amount: 5000, type: 'income', date: 'Today' },
-            { name: 'Grocery Shopping', amount: -120.50, type: 'expense', date: 'Yesterday' },
-            { name: 'Freelance Project', amount: 1500, type: 'income', date: '2 days ago' },
-          ].map((tx, i) => (
-            <div key={i} className="flex items-center justify-between py-3 border-b border-gray-100 last:border-0">
-              <div>
-                <div className="font-medium text-gray-900">{tx.name}</div>
-                <div className="text-sm text-gray-500">{tx.date}</div>
-              </div>
-              <div className={`font-semibold ${tx.type === 'income' ? 'text-green-600' : 'text-red-600'}`}>
-                {tx.amount > 0 ? '+' : ''}${Math.abs(tx.amount).toFixed(2)}
-              </div>
-            </div>
-          ))}
-        </div>
+      <StatCards />
+
+      {/* Placeholder for other components */}
+      <div className="bg-surface-light rounded-xl p-6 border border-border-color">
+        <p className="text-text-secondary">Budget Breakdown & Insights will go here</p>
       </div>
+
+      <div className="bg-surface-light rounded-xl p-6 border border-border-color">
+        <h3 className="text-xl font-semibold text-text-main mb-4">Recent Transactions</h3>
+        <p className="text-text-secondary">Transactions table will go here</p>
+      </div>
+
+      {/* Footer */}
+      <footer className="mt-8 text-center text-xs text-gray-400 font-medium">
+        <p>© 2024 Wealth Builder. All rights reserved.</p>
+      </footer>
     </div>
   );
 }
