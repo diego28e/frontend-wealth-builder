@@ -1,31 +1,31 @@
-import {TrendingUp, TrendingDown, DollarSign} from 'lucide-react';
+import { TrendingUp, TrendingDown, DollarSign, Wallet } from 'lucide-react';
 
 export default function StatCards() {
+  const stats = [
+    {
+      label: 'Total Balance',
+      value: '$12,450.00',
+      change: '+12.5%',
+      trend: 'up' as const,
+      icon: DollarSign,
+    },
+    {
+      label: 'Income',
+      value: '$8,200.00',
+      change: 'This month',
+      trend: 'neutral' as const,
+      icon: TrendingUp,
+    },
+    {
+      label: 'Expenses',
+      value: '$3,750.00',
+      change: '-8.2%',
+      trend: 'down' as const,
+      icon: TrendingDown,
+    },
+  ];
 
-    const stats = [
-        {
-            label: 'Total Balance',
-            value: '$12,450.00',
-            change: '+12.5%',
-            trend: 'up' as const,
-            icon: DollarSign,
-        },
-        {
-            label: 'Income',
-            value: '$8,200.00',
-            change: 'This month',
-            trend: 'neutral' as const,
-            icon: TrendingUp,
-        },
-        {
-            label: 'Expenses',
-            value: '$3,750.00',
-            change: '-8.2%',
-            trend: 'down' as const,
-            icon: TrendingDown,
-        },
-    ]
-    return (
+  return (
     <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
       {stats.map((stat) => {
         const Icon = stat.icon;
