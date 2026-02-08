@@ -1,6 +1,8 @@
 import { Calendar, Plus } from 'lucide-react';
 import StatCards from '../components/dashboard/StatCards';
 import  TransactionsTable from '../components/dashboard/TransactionsTable';
+import BudgetBreakdown from '../components/dashboard/BudgetBreakdown';
+import InsightsCard from '../components/dashboard/InsightsCard';
 
 export default function Dashboard() {
   return (
@@ -28,9 +30,15 @@ export default function Dashboard() {
       <StatCards />
 
       {/* Placeholder for other components */}
-      <div className="bg-surface-light rounded-xl p-6 border border-border-color">
-        <p className="text-text-secondary">Budget Breakdown & Insights will go here</p>
+      <div className='grid grid-cols-1 lg:grid-cols-3 gap-6'>
+        <div className='lg:col-span-2'>
+          <BudgetBreakdown/>
+        </div>
+        <div className='lg:col-span-1'>
+          <InsightsCard/>
+        </div>
       </div>
+
 
       <TransactionsTable />
 
