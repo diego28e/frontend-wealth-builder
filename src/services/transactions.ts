@@ -2,8 +2,19 @@ import {apiClient} from '../lib/api';
 import type {Transaction, CreateTransactionRequest} from '../types/api';
 
 export const transactionService = {
-    async getUserTransactions(userId: string): Promise<Transaction[]> {
-        return apiClient<Transaction[]>(`/users/${userId}/transactions`);
+    async getUserTransactions(
+        userId: string,
+        startDate?:string,
+        endDate?:string
+    ): Promise<Transaction[]> {
+
+        let url = `/users/${userId}/transactions`;
+
+        if (startDate && endDate) {
+            url += `?start_date=${startDate}&end_date=${endDate}`;
+        }
+
+        return apiClient<Transaction[]>(url);
     },
     async getTransactionById(id:string):Promise<Transaction> {
         return apiClient<Transaction>(`/transactions/${id}`);
