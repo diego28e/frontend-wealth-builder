@@ -8,10 +8,12 @@ import { useTransactions } from '../hooks/useTransactions';
 import { useCategories } from '../hooks/useCategories';
 import { useBalance } from '../hooks/useBalance';
 import { useAuth } from '../contexts/AuthContext';
+import {useNavigate} from '@tanstack/react-router';
 
 export default function Dashboard() {
   const { user } = useAuth();
   const [selectedDate, setSelectedDate] = useState(new Date());
+  const navigate = useNavigate();
 
   const { startDate, endDate, monthLabel } = useMemo(() => {
     const year = selectedDate.getFullYear();
@@ -77,7 +79,7 @@ export default function Dashboard() {
               <ChevronRight size={16} className="text-gray-600" />
             </button>
           </div>
-          <button className="px-5 py-2.5 bg-primary text-white rounded-xl text-sm font-bold shadow-lg shadow-green-500/30 hover:bg-primary-hover transition-all flex items-center gap-2 transform active:scale-95">
+          <button onClick={() => navigate({to:'/transactions'})} className="px-5 py-2.5 bg-primary text-white rounded-xl text-sm font-bold shadow-lg shadow-green-500/30 hover:bg-primary-hover transition-all flex items-center gap-2 transform active:scale-95 cursor-pointer">
             <Plus size={18} strokeWidth={3} />
             Add Transaction
           </button>
