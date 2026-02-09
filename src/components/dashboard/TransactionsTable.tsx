@@ -1,4 +1,5 @@
 import { ArrowUpRight, ArrowDownRight } from 'lucide-react';
+import { fromCents } from '../../lib/currency';
 import type { Transaction } from '../../types/api';
 
 interface TransactionsTableProps {
@@ -88,7 +89,7 @@ export default function TransactionsTable({ transactions, getCategoryName }: Tra
                       tx.type === 'Income' ? 'text-green-600' : 'text-red-600'
                     }`}
                   >
-                    {tx.amount > 0 ? '+' : ''}{tx.currency_code} {Math.abs(tx.amount).toFixed(2)}
+                    {tx.amount > 0 ? '+' : ''}{tx.currency_code} {fromCents(Math.abs(tx.amount)).toFixed(2)}
                   </span>
                 </td>
               </tr>

@@ -1,5 +1,6 @@
 import { TrendingUp, TrendingDown, DollarSign } from 'lucide-react';
 import type { Transaction, UserBalance } from '../../types/api';
+import { fromCents } from '../../lib/currency';
 import { useMemo } from 'react';
 
 interface StatCardsProps {
@@ -24,21 +25,21 @@ export default function StatCards({ transactions, balance }: StatCardsProps) {
     return [
       {
         label: 'Total Balance',
-        value: `${currencyCode} ${currentBalance.toLocaleString()}`,
-        change: `From ${currencyCode} ${startingBalance.toLocaleString()}`,
+        value: `${currencyCode} ${fromCents(currentBalance).toLocaleString()}`,
+        change: `From ${currencyCode} ${fromCents(startingBalance).toLocaleString()}`,
         trend: 'neutral' as const,
         icon: DollarSign,
       },
       {
         label: 'Income',
-        value: `${currencyCode} ${totalIncome.toLocaleString()}`,
+        value: `${currencyCode} ${fromCents(totalIncome).toLocaleString()}`,
         change: 'This period',
         trend: 'up' as const,
         icon: TrendingUp,
       },
       {
         label: 'Expenses',
-        value: `${currencyCode} ${totalExpenses.toLocaleString()}`,
+        value: `${currencyCode} ${fromCents(totalExpenses).toLocaleString()}`,
         change: 'This period',
         trend: 'down' as const,
         icon: TrendingDown,

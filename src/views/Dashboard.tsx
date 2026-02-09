@@ -26,7 +26,7 @@ export default function Dashboard() {
 }, [selectedDate]);
 
 const { transactions, isLoading: transactionsLoading } = useTransactions(user?.id, startDate, endDate);
-const { balance, isLoading: balanceLoading } = useBalance(user?.id);
+const { balance, isLoading: balanceLoading } = useBalance();
 const { summary, isLoading: summaryLoading } = useCategoryGroupSummary(user?.id, startDate, endDate);
 const { getCategoryName } = useCategories();
 

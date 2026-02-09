@@ -5,6 +5,7 @@ import { useCategories } from '../../hooks/useCategories';
 import { useAccounts } from '../../hooks/useAccounts';
 import { transactionService } from '../../services/transactions';
 import { receiptService } from '../../services/receipts';
+import { toCents } from '../../lib/currency';
 import type { CreateTransactionRequest } from '../../types/api';
 
 interface TransactionFormProps {
@@ -42,7 +43,7 @@ export function TransactionForm({ onSuccess, onCancel }: TransactionFormProps) {
         account_id: formData.account_id,
         category_id: formData.category_id,
         date: formData.date,
-        amount: parseFloat(formData.amount),
+        amount: toCents(formData.amount),
         type: formData.type,
         description: formData.description,
         currency_code: user.default_currency,
@@ -53,7 +54,7 @@ export function TransactionForm({ onSuccess, onCancel }: TransactionFormProps) {
         setIsUploadingReceipt(true);
         const receiptData = await receiptService.uploadReceipt(receiptFile, user.id);
         if (receiptData.extracted_data) {
-          transactionData.amount = receiptData.extracted_data.amount || transactionData.amount;
+          transactionData.amount = receiptData.extracted_data.amount ? toCents(receiptData.extracted_data.amount) : transactionData.amount;
           transactionData.merchant_name = receiptData.extracted_data.merchant || transactionData.merchant_name;
           transactionData.date = receiptData.extracted_data.date || transactionData.date;
         }

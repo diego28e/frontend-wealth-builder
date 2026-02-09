@@ -3,6 +3,7 @@ import { useAuth } from '../contexts/AuthContext';
 import { useAccounts } from '../hooks/useAccounts';
 import { useCurrencies } from '../hooks/useCurrencies';
 import { accountService } from '../services/accounts';
+import { toCents, fromCents } from '../lib/currency';
 import type { AccountType, CreateAccountRequest } from '../types/api';
 
 export default function Accounts() {
@@ -12,8 +13,8 @@ export default function Accounts() {
   const [showForm, setShowForm] = useState(false);
   const [formData, setFormData] = useState({
     name: '',
-    type: 'Checking' as AccountType,
-    currency_code: user?.default_currency || 'USD',
+    type: 'Savings' as AccountType,
+    currency_code: user?.default_currency || 'COP',
     current_balance: '',
   });
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -29,7 +30,7 @@ export default function Accounts() {
         name: formData.name,
         type: formData.type,
         currency_code: formData.currency_code,
-        current_balance: parseFloat(formData.current_balance),
+        current_balance: toCents(formData.current_balance),
       };
       await accountService.createAccount(request);
       setFormData({ name: '', type: 'Checking', currency_code: user.default_currency, current_balance: '' });
@@ -129,7 +130,7 @@ export default function Accounts() {
               </div>
               <div className="text-right">
                 <p className="text-2xl font-bold">
-                  {account.current_balance.toLocaleString('en-US', {
+                  {fromCents(account.current_balance).toLocaleString('en-US', {
                     style: 'currency',
                     currency: account.currency_code,
                   })}
