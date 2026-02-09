@@ -82,3 +82,16 @@ export interface CreateTransactionRequest {
     currency_code: string;
     merchant_name?:string;
 }
+
+export interface UserBalance {
+    starting_balance: number;
+    current_balance: number;
+    total_income: number;
+    total_expenses: number;
+    currency_code: string;
+}
+
+export interface UpdateStartingBalanceRequest {
+    starting_balance: number;
+    currency_code: string;
+}
