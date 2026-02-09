@@ -5,13 +5,27 @@ import BudgetBreakdown from '../components/dashboard/BudgetBreakdown';
 import InsightsCard from '../components/dashboard/InsightsCard';
 import { useTransactions } from '../hooks/useTransactions';
 import { useCategories } from '../hooks/useCategories';
+import { useBalance } from '../hooks/useBalance';
 import { useAuth } from '../contexts/AuthContext';
 
 export default function Dashboard() {
   const { user } = useAuth();
-  const { transactions, isLoading, error } = useTransactions();
+  const { transactions, isLoading: txLoading} = useTransactions();
   const { getCategoryName } = useCategories();
+  const {balance, isLoading: balanceLoading} = useBalance();
 
+  const isLoading = txLoading || balanceLoading;
+
+  if (isLoading) {
+    return (
+      <div className="flex items-center justify-center min-h-[400px]">
+        <div className="text-center">
+          <div className="w-12 h-12 border-4 border-primary border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
+          <p className="text-text-secondary">Loading dashboard...</p>
+        </div>
+      </div>
+    );
+  }
   return (
     <div className="space-y-8">
       {/* Header Section */}
@@ -34,7 +48,7 @@ export default function Dashboard() {
         </div>
       </div>
 
-      <StatCards />
+      <StatCards transactions={transactions} balance={balance} />
 
       {/* Budget Breakdown & Insights */}
       <div className='grid grid-cols-1 lg:grid-cols-3 gap-6'>

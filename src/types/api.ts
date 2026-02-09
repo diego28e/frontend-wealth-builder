@@ -85,11 +85,11 @@ export interface CreateTransactionRequest {
 
 export interface UserBalance {
     starting_balance: number;
-    current_balance: number;
-    total_income: number;
-    total_expenses: number;
-    currency_code: string;
+    starting_balance_date: string;
+    starting_balance_currency_code: string;
+    current_calculated_balance: number;
 }
+
 
 export interface UpdateStartingBalanceRequest {
     starting_balance: number;
