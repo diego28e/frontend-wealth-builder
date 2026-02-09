@@ -1,4 +1,5 @@
-import { Calendar, Plus } from 'lucide-react';
+import { Calendar, Plus, ChevronLeft, ChevronRight } from 'lucide-react';
+import { useState, useMemo } from 'react';
 import StatCards from '../components/dashboard/StatCards';
 import TransactionsTable from '../components/dashboard/TransactionsTable';
 import BudgetBreakdown from '../components/dashboard/BudgetBreakdown';
@@ -10,11 +11,38 @@ import { useAuth } from '../contexts/AuthContext';
 
 export default function Dashboard() {
   const { user } = useAuth();
-  const { transactions, isLoading: txLoading} = useTransactions();
+  const [selectedDate, setSelectedDate] = useState(new Date());
+
+  const { startDate, endDate, monthLabel } = useMemo(() => {
+    const year = selectedDate.getFullYear();
+    const month = selectedDate.getMonth();
+    const start = new Date(year, month, 1);
+    const end = new Date(year, month + 1, 0);
+    
+    return {
+      startDate: start.toISOString().split('T')[0],
+      endDate: end.toISOString().split('T')[0],
+      monthLabel: selectedDate.toLocaleDateString('en-US', { month: 'short', year: 'numeric' }),
+    };
+  }, [selectedDate]);
+
+  const { transactions, isLoading: txLoading } = useTransactions(startDate, endDate);
   const { getCategoryName } = useCategories();
-  const {balance, isLoading: balanceLoading} = useBalance();
+  const { balance, isLoading: balanceLoading } = useBalance();
 
   const isLoading = txLoading || balanceLoading;
+
+  const handlePreviousMonth = () => {
+    setSelectedDate(new Date(selectedDate.getFullYear(), selectedDate.getMonth() - 1));
+  };
+
+  const handleNextMonth = () => {
+    setSelectedDate(new Date(selectedDate.getFullYear(), selectedDate.getMonth() + 1));
+  };
+
+  const handleCurrentMonth = () => {
+    setSelectedDate(new Date());
+  };
 
   if (isLoading) {
     return (
@@ -37,10 +65,18 @@ export default function Dashboard() {
           </p>
         </div>
         <div className="flex gap-3">
-          <button className="px-4 py-2.5 bg-surface-light border border-border-color rounded-xl text-sm font-bold shadow-sm hover:bg-gray-50 transition-colors flex items-center gap-2 text-text-main">
-            <Calendar size={16} className="text-gray-500" />
-            Oct 2023
-          </button>
+          <div className="flex items-center gap-2 bg-surface-light border border-border-color rounded-xl px-2 py-1">
+            <button onClick={handlePreviousMonth} className="p-1.5 rounded-lg hover:bg-gray-100 transition-colors">
+              <ChevronLeft size={16} className="text-gray-600" />
+            </button>
+            <button onClick={handleCurrentMonth} className="px-3 py-1.5 text-sm font-bold text-text-main hover:bg-gray-100 rounded-lg transition-colors flex items-center gap-2">
+              <Calendar size={14} className="text-gray-500" />
+              {monthLabel}
+            </button>
+            <button onClick={handleNextMonth} className="p-1.5 rounded-lg hover:bg-gray-100 transition-colors">
+              <ChevronRight size={16} className="text-gray-600" />
+            </button>
+          </div>
           <button className="px-5 py-2.5 bg-primary text-white rounded-xl text-sm font-bold shadow-lg shadow-green-500/30 hover:bg-primary-hover transition-all flex items-center gap-2 transform active:scale-95">
             <Plus size={18} strokeWidth={3} />
             Add Transaction
