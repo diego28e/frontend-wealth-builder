@@ -1,23 +1,24 @@
 import { useState, useEffect } from 'react';
 import { transactionService } from '../services/transactions';
-import { useAuth } from '../contexts/AuthContext';
 import type { Transaction } from '../types/api';
 
-export function useTransactions(startDate?: string, endDate?: string) {
-  const { user } = useAuth();
+export function useTransactions(userId: string | undefined, startDate?: string, endDate?: string) {
   const [transactions, setTransactions] = useState<Transaction[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    if (!user) return;
+    if (!userId) {
+      setIsLoading(false);
+      return;
+    }
 
     async function fetchTransactions() {
       try {
         setIsLoading(true);
         setError(null);
         const data = await transactionService.getUserTransactions(
-          user!.id,
+          userId,
           startDate,
           endDate
         );
@@ -31,7 +32,7 @@ export function useTransactions(startDate?: string, endDate?: string) {
     }
 
     fetchTransactions();
-  }, [user, startDate, endDate]);
+  }, [userId, startDate, endDate]);
 
   return { transactions, isLoading, error };
 }

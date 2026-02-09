@@ -1,6 +1,7 @@
 export type UserProfileType = 'Low-Income' | 'High-Income/High-Expense' | 'Wealth-Builder';
 export type TransactionType = 'Income' | 'Expense';
 export type CategoryGroupName = 'Income' | 'Needs' | 'Wants' | 'Savings';
+export type AccountType = 'Checking' | 'Savings' | 'Credit Card' | 'Cash' | 'Investment' | 'Other';
 
 interface UserBase {
     email: string;
@@ -39,6 +40,7 @@ export interface ErrorResponse{
 export interface Category {
     id: string;
     user_id: string;
+    category_group_id: string;
     name: string;
     description: string;
     is_active: boolean;
@@ -53,9 +55,30 @@ export interface CategoryGroup {
     sort_order: number;
 }
 
+export interface Account {
+    id: string;
+    user_id: string;
+    name: string;
+    type: AccountType;
+    currency_code: string;
+    current_balance: number;
+    is_active: boolean;
+    created_at: string;
+    updated_at: string;
+}
+
+export interface CreateAccountRequest {
+    user_id: string;
+    name: string;
+    type: AccountType;
+    currency_code: string;
+    current_balance: number;
+}
+
 export interface Transaction {
     id: string;
     user_id: string;
+    account_id: string;
     category_id: string;
     goal_id: string | null;
     date: string;
@@ -72,15 +95,32 @@ export interface Transaction {
 
 export interface CreateTransactionRequest {
     user_id: string;
+    account_id: string;
     category_id: string;
-    goal_id?:string;
+    goal_id?: string;
     date: string;
     amount: number;
     type: TransactionType;
     description: string;
-    notes?:string;
+    notes?: string;
     currency_code: string;
-    merchant_name?:string;
+    merchant_name?: string;
+}
+
+export interface ReceiptUploadResponse {
+    transaction_id: string;
+    receipt_url: string;
+    extracted_data?: {
+        amount?: number;
+        merchant?: string;
+        date?: string;
+    };
+}
+
+export interface Currency {
+    code: string;
+    name: string;
+    symbol: string;
 }
 
 export interface UserBalance {
@@ -94,4 +134,11 @@ export interface UserBalance {
 export interface UpdateStartingBalanceRequest {
     starting_balance: number;
     currency_code: string;
+}
+
+export interface CategoryGroupSummary {
+    category_group_id: string;
+    category_group_name: CategoryGroupName;
+    total_amount:number;
+    transaction_count: number;
 }

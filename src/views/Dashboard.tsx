@@ -2,7 +2,8 @@ import { Calendar, Plus, ChevronLeft, ChevronRight } from 'lucide-react';
 import { useState, useMemo } from 'react';
 import StatCards from '../components/dashboard/StatCards';
 import TransactionsTable from '../components/dashboard/TransactionsTable';
-import BudgetBreakdown from '../components/dashboard/BudgetBreakdown';
+import {BudgetBreakdown} from '../components/dashboard/BudgetBreakdown';
+import { useCategoryGroupSummary } from '../hooks/useCategoryGroupSummary';
 import InsightsCard from '../components/dashboard/InsightsCard';
 import { useTransactions } from '../hooks/useTransactions';
 import { useCategories } from '../hooks/useCategories';
@@ -15,24 +16,21 @@ export default function Dashboard() {
   const [selectedDate, setSelectedDate] = useState(new Date());
   const navigate = useNavigate();
 
-  const { startDate, endDate, monthLabel } = useMemo(() => {
-    const year = selectedDate.getFullYear();
-    const month = selectedDate.getMonth();
-    const start = new Date(year, month, 1);
-    const end = new Date(year, month + 1, 0);
-    
-    return {
-      startDate: start.toISOString().split('T')[0],
-      endDate: end.toISOString().split('T')[0],
-      monthLabel: selectedDate.toLocaleDateString('en-US', { month: 'short', year: 'numeric' }),
-    };
-  }, [selectedDate]);
+  const { startDate, endDate } = useMemo(() => {
+  const start = new Date(selectedDate.getFullYear(), selectedDate.getMonth(), 1);
+  const end = new Date(selectedDate.getFullYear(), selectedDate.getMonth() + 1, 0);
+  return {
+    startDate: start.toISOString().split('T')[0],
+    endDate: end.toISOString().split('T')[0],
+  };
+}, [selectedDate]);
 
-  const { transactions, isLoading: txLoading } = useTransactions(startDate, endDate);
-  const { getCategoryName } = useCategories();
-  const { balance, isLoading: balanceLoading } = useBalance();
+const { transactions, isLoading: transactionsLoading } = useTransactions(user?.id, startDate, endDate);
+const { balance, isLoading: balanceLoading } = useBalance(user?.id);
+const { summary, isLoading: summaryLoading } = useCategoryGroupSummary(user?.id, startDate, endDate);
+const { getCategoryName } = useCategories();
 
-  const isLoading = txLoading || balanceLoading;
+const monthLabel = selectedDate.toLocaleDateString('en-US', { month: 'long', year: 'numeric' });
 
   const handlePreviousMonth = () => {
     setSelectedDate(new Date(selectedDate.getFullYear(), selectedDate.getMonth() - 1));
@@ -46,7 +44,7 @@ export default function Dashboard() {
     setSelectedDate(new Date());
   };
 
-  if (isLoading) {
+  if (transactionsLoading || balanceLoading || summaryLoading) {
     return (
       <div className="flex items-center justify-center min-h-[400px]">
         <div className="text-center">
@@ -91,7 +89,7 @@ export default function Dashboard() {
       {/* Budget Breakdown & Insights */}
       <div className='grid grid-cols-1 lg:grid-cols-3 gap-6'>
         <div className='lg:col-span-2'>
-          <BudgetBreakdown transactions={transactions} getCategoryName={getCategoryName} />
+          <BudgetBreakdown summary={summary} />
         </div>
         <div className='lg:col-span-1'>
           <InsightsCard />

@@ -12,6 +12,7 @@ import Home from "./views/Home";
 import Dashboard from "./views/Dashboard";
 import Transactions from "./views/Transactions";
 import Goals from "./views/Goals";
+import Accounts from "./views/Accounts";
 import Login from "./views/Login";
 import Register from "./views/Register";
 import About from "./views/About";
@@ -73,6 +74,12 @@ const goalsRoute = createRoute({
   component: Goals,
 });
 
+const accountsRoute = createRoute({
+  getParentRoute: () => dashboardLayoutRoute,
+  path: "/accounts",
+  component: Accounts,
+});
+
 const loginRoute = createRoute({
   getParentRoute: () => authLayoutRoute,
   path: "/login",
@@ -94,7 +101,7 @@ const aboutRoute = createRoute({
 const routeTree = rootRoute.addChildren([
   appLayoutRoute.addChildren([homeRoute, dashboardRoute, aboutRoute]),
   authLayoutRoute.addChildren([loginRoute, registerRoute]),
-  dashboardLayoutRoute.addChildren([dashboardRoute, transactionsRoute, goalsRoute])
+  dashboardLayoutRoute.addChildren([dashboardRoute, transactionsRoute, goalsRoute, accountsRoute])
 ]);
 
 export const router = createRouter({ routeTree });

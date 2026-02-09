@@ -1,5 +1,5 @@
 import { Link, useLocation } from "@tanstack/react-router";
-import {LayoutDashboard, Home, Receipt, Target, PiggyBank, LogOut} from 'lucide-react';
+import {LayoutDashboard, Home, Receipt, Target, Wallet, PiggyBank, LogOut} from 'lucide-react';
 import { useAuth } from '../../contexts/AuthContext';
 
 export function Sidebar() {
@@ -10,6 +10,7 @@ export function Sidebar() {
         {to: '/', icon:Home, label: 'Home'},
         {to: '/dashboard', icon:LayoutDashboard, label: 'Dashboard'},
         {to: '/transactions', icon:Receipt, label: 'Transactions'},
+        {to: '/accounts', icon:Wallet, label: 'Accounts'},
         {to: '/goals', icon:Target, label: 'Goals'},
     ]
 

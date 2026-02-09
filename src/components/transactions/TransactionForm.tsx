@@ -1,7 +1,10 @@
 import { useState } from 'react';
-import { Calendar, DollarSign, Store, FileText } from 'lucide-react';
+import { Calendar, DollarSign, Store, FileText, Upload } from 'lucide-react';
 import { useAuth } from '../../contexts/AuthContext';
 import { useCategories } from '../../hooks/useCategories';
+import { useAccounts } from '../../hooks/useAccounts';
+import { transactionService } from '../../services/transactions';
+import { receiptService } from '../../services/receipts';
 import type { CreateTransactionRequest } from '../../types/api';
 
 interface TransactionFormProps {
@@ -12,6 +15,7 @@ interface TransactionFormProps {
 export function TransactionForm({ onSuccess, onCancel }: TransactionFormProps) {
   const { user } = useAuth();
   const { categories } = useCategories();
+  const { accounts } = useAccounts(user?.id);
   
   const [formData, setFormData] = useState({
     amount: '',
@@ -19,14 +23,61 @@ export function TransactionForm({ onSuccess, onCancel }: TransactionFormProps) {
     date: new Date().toISOString().split('T')[0],
     description: '',
     category_id: '',
+    account_id: '',
     type: 'Expense' as 'Income' | 'Expense',
   });
+  const [receiptFile, setReceiptFile] = useState<File | null>(null);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isUploadingReceipt, setIsUploadingReceipt] = useState(false);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    // TODO: Call API to create transaction
-    console.log('Submit:', formData);
-    onSuccess?.();
+    if (!user || !formData.account_id) return;
+
+    try {
+      setIsSubmitting(true);
+
+      let transactionData: CreateTransactionRequest = {
+        user_id: user.id,
+        account_id: formData.account_id,
+        category_id: formData.category_id,
+        date: formData.date,
+        amount: parseFloat(formData.amount),
+        type: formData.type,
+        description: formData.description,
+        currency_code: user.default_currency,
+        merchant_name: formData.merchant_name || undefined,
+      };
+
+      if (receiptFile) {
+        setIsUploadingReceipt(true);
+        const receiptData = await receiptService.uploadReceipt(receiptFile, user.id);
+        if (receiptData.extracted_data) {
+          transactionData.amount = receiptData.extracted_data.amount || transactionData.amount;
+          transactionData.merchant_name = receiptData.extracted_data.merchant || transactionData.merchant_name;
+          transactionData.date = receiptData.extracted_data.date || transactionData.date;
+        }
+        setIsUploadingReceipt(false);
+      }
+
+      await transactionService.createTransaction(transactionData);
+      
+      setFormData({
+        amount: '',
+        merchant_name: '',
+        date: new Date().toISOString().split('T')[0],
+        description: '',
+        category_id: '',
+        account_id: '',
+        type: 'Expense',
+      });
+      setReceiptFile(null);
+      onSuccess?.();
+    } catch (err) {
+      console.error('Failed to create transaction', err);
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
@@ -65,6 +116,27 @@ export function TransactionForm({ onSuccess, onCancel }: TransactionFormProps) {
             Expense
           </button>
         </div>
+      </div>
+
+      {/* Account Selection */}
+      <div>
+        <label className="block text-xs font-bold text-text-secondary uppercase tracking-wider mb-2">
+          Account
+        </label>
+        <select
+          name="account_id"
+          value={formData.account_id}
+          onChange={handleInputChange}
+          className="w-full h-11 px-4 bg-surface-light border border-border-color rounded-lg text-text-main text-sm focus:ring-2 focus:ring-primary focus:border-primary"
+          required
+        >
+          <option value="">Select account</option>
+          {accounts.map((acc) => (
+            <option key={acc.id} value={acc.id}>
+              {acc.name} ({acc.type})
+            </option>
+          ))}
+        </select>
       </div>
 
       {/* Amount */}
@@ -144,6 +216,25 @@ export function TransactionForm({ onSuccess, onCancel }: TransactionFormProps) {
         </select>
       </div>
 
+      {/* Receipt Upload */}
+      <div>
+        <label className="block text-xs font-bold text-text-secondary uppercase tracking-wider mb-2">
+          Receipt (Optional)
+        </label>
+        <div className="relative">
+          <Upload size={18} className="absolute left-3 top-1/2 -translate-y-1/2 text-text-secondary" />
+          <input
+            type="file"
+            accept="image/*,.pdf"
+            onChange={(e) => setReceiptFile(e.target.files?.[0] || null)}
+            className="w-full h-11 pl-10 pr-4 bg-surface-light border border-border-color rounded-lg text-text-main text-sm focus:ring-2 focus:ring-primary focus:border-primary file:mr-4 file:py-1 file:px-2 file:rounded file:border-0 file:text-xs file:bg-primary/10 file:text-primary"
+          />
+        </div>
+        {receiptFile && (
+          <p className="text-xs text-gray-600 mt-1">{receiptFile.name}</p>
+        )}
+      </div>
+
       {/* Description */}
       <div>
         <label className="block text-xs font-bold text-text-secondary uppercase tracking-wider mb-2">
@@ -176,9 +267,10 @@ export function TransactionForm({ onSuccess, onCancel }: TransactionFormProps) {
         )}
         <button
           type="submit"
-          className="flex-1 h-11 bg-primary text-white font-bold rounded-lg hover:bg-primary-hover transition-colors shadow-lg shadow-green-500/30"
+          disabled={isSubmitting || isUploadingReceipt}
+          className="flex-1 h-11 bg-primary text-white font-bold rounded-lg hover:bg-primary-hover transition-colors shadow-lg shadow-green-500/30 disabled:opacity-50"
         >
-          Add Transaction
+          {isUploadingReceipt ? 'Processing Receipt...' : isSubmitting ? 'Adding...' : 'Add Transaction'}
         </button>
       </div>
     </form>

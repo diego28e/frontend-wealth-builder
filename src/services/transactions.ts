@@ -1,5 +1,5 @@
 import {apiClient} from '../lib/api';
-import type {Transaction, CreateTransactionRequest} from '../types/api';
+import type {Transaction, CreateTransactionRequest, CategoryGroupSummary} from '../types/api';
 
 export const transactionService = {
     async getUserTransactions(
@@ -36,5 +36,17 @@ export const transactionService = {
         await apiClient(`/transactions/${id}`, {
             method: 'DELETE',
         });
+    },
+
+    async getCategoryGroupSummary(
+        userId:string,
+        startDate?:string,
+        endDate?:string
+    ) : Promise<CategoryGroupSummary[]> {
+        const params = new URLSearchParams();
+        if (startDate) params.append('start_date', startDate);
+        if (endDate) params.append('end_date', endDate);
+        const query = params.toString() ? `?${params.toString()}` : '';
+        return apiClient<CategoryGroupSummary[]>(`/users/${userId}/category-group-summary${query}`)
     }
 }
