@@ -10,6 +10,8 @@ import AuthLayout from "./layouts/AuthLayout";
 import DashboardLayout from "./layouts/DashboardLayout";
 import Home from "./views/Home";
 import Dashboard from "./views/Dashboard";
+import Transactions from "./views/Transactions";
+import Goals from "./views/Goals";
 import Login from "./views/Login";
 import Register from "./views/Register";
 import About from "./views/About";
@@ -59,6 +61,18 @@ const dashboardRoute = createRoute({
   component: Dashboard,
 });
 
+const transactionsRoute = createRoute({
+  getParentRoute: () => dashboardLayoutRoute,
+  path: "/transactions",
+  component: Transactions,
+});
+
+const goalsRoute = createRoute({
+  getParentRoute: () => dashboardLayoutRoute,
+  path: "/goals",
+  component: Goals,
+});
+
 const loginRoute = createRoute({
   getParentRoute: () => authLayoutRoute,
   path: "/login",
@@ -80,7 +94,7 @@ const aboutRoute = createRoute({
 const routeTree = rootRoute.addChildren([
   appLayoutRoute.addChildren([homeRoute, dashboardRoute, aboutRoute]),
   authLayoutRoute.addChildren([loginRoute, registerRoute]),
-  dashboardLayoutRoute.addChildren([dashboardRoute])
+  dashboardLayoutRoute.addChildren([dashboardRoute, transactionsRoute, goalsRoute])
 ]);
 
 export const router = createRouter({ routeTree });
