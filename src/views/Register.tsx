@@ -55,7 +55,7 @@ export default function Register() {
       </form>
 
       <p className="text-center text-sm text-gray-600 mt-6">
-        Don't have an account? <Link to='/login' className="text-emerald-600 font-medium cursor-pointer hover:underline">Sign in</Link>
+        Already have an account? <Link to='/login' className="text-emerald-600 font-medium cursor-pointer hover:underline">Sign in</Link>
       </p>
     </div>
   );

@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { useNavigate } from '@tanstack/react-router';
 import {useAuth} from '../contexts/AuthContext';
+import { Link } from '@tanstack/react-router';
 
 export default function Login() {
   const [email, setEmail] = useState('');
@@ -81,7 +82,7 @@ export default function Login() {
       <p className="text-center text-sm text-gray-600 mt-6">
         Don't have an account?{' '}
         <span className="text-emerald-600 font-medium cursor-pointer hover:underline">
-          Sign up
+          <Link to='/register' className="text-emerald-600 font-medium cursor-pointer hover:underline">Sign up</Link>
         </span>
       </p>
     </div>
