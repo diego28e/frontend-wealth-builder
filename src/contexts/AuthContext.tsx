@@ -19,6 +19,12 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   useEffect(()=> {
     async function checkSession() {
+        // Skip session check on public auth routes to avoid unnecessary 401s
+        if (window.location.pathname === '/login' || window.location.pathname === '/register') {
+            setIsLoading(false);
+            return;
+        }
+
         try {
             const response = await authService.getMe();
             setUser(response.user);
