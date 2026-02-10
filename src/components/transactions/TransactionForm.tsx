@@ -38,15 +38,18 @@ export function TransactionForm({ onSuccess, onCancel }: TransactionFormProps) {
     try {
       setIsSubmitting(true);
 
+      const selectedAccount = accounts.find(acc => acc.id === formData.account_id);
+      if (!selectedAccount) return;
+
       let transactionData: CreateTransactionRequest = {
         user_id: user.id,
         account_id: formData.account_id,
         category_id: formData.category_id,
-        date: formData.date,
+        date: new Date(formData.date).toISOString(),
         amount: toCents(formData.amount),
         type: formData.type,
         description: formData.description,
-        currency_code: user.default_currency,
+        currency_code: selectedAccount.currency_code,
         merchant_name: formData.merchant_name || undefined,
       };
 
@@ -56,7 +59,7 @@ export function TransactionForm({ onSuccess, onCancel }: TransactionFormProps) {
         if (receiptData.extracted_data) {
           transactionData.amount = receiptData.extracted_data.amount ? toCents(receiptData.extracted_data.amount) : transactionData.amount;
           transactionData.merchant_name = receiptData.extracted_data.merchant || transactionData.merchant_name;
-          transactionData.date = receiptData.extracted_data.date || transactionData.date;
+          transactionData.date = receiptData.extracted_data.date ? new Date(receiptData.extracted_data.date).toISOString() : transactionData.date;
         }
         setIsUploadingReceipt(false);
       }

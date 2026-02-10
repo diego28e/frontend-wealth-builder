@@ -2,6 +2,9 @@ export type UserProfileType = 'Low-Income' | 'High-Income/High-Expense' | 'Wealt
 export type TransactionType = 'Income' | 'Expense';
 export type CategoryGroupName = 'Income' | 'Needs' | 'Wants' | 'Savings';
 export type AccountType = 'Checking' | 'Savings' | 'Credit Card' | 'Cash' | 'Investment' | 'Other';
+export type ConfigurationType = 'PERCENTAGE' | 'FIXED';
+export type ConfigurationFrequency = 'PER_TRANSACTION' | 'MONTHLY' | 'ANNUAL' | 'ONE_TIME';
+export type ConfigurationAppliesTo = 'INCOME' | 'EXPENSE' | 'BALANCE' | 'ALL';
 
 interface UserBase {
     email: string;
@@ -55,6 +58,20 @@ export interface CategoryGroup {
     sort_order: number;
 }
 
+export interface AccountConfiguration {
+    id?: string;
+    account_id?: string;
+    name: string;
+    type: ConfigurationType;
+    value: number;
+    currency_code?: string;
+    frequency: ConfigurationFrequency;
+    applies_to?: ConfigurationAppliesTo;
+    is_active?: boolean;
+    created_at?: string;
+    updated_at?: string;
+}
+
 export interface Account {
     id: string;
     user_id: string;
@@ -63,6 +80,7 @@ export interface Account {
     currency_code: string;
     current_balance: number;
     is_active: boolean;
+    configurations?: AccountConfiguration[];
     created_at: string;
     updated_at: string;
 }
@@ -73,6 +91,16 @@ export interface CreateAccountRequest {
     type: AccountType;
     currency_code: string;
     current_balance: number;
+    configurations?: AccountConfiguration[];
+}
+
+export interface UpdateAccountRequest {
+    name?: string;
+    type?: AccountType;
+    currency_code?: string;
+    current_balance?: number;
+    is_active?: boolean;
+    configurations?: AccountConfiguration[];
 }
 
 export interface Transaction {
