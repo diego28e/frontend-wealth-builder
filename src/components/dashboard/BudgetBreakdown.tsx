@@ -7,9 +7,7 @@ interface BudgetBreakdownProps {
 
 export function BudgetBreakdown({ summary }: BudgetBreakdownProps) {
   const breakdown = useMemo(() => {
-    const expenses = summary.filter(s => s.category_group_name !== 'Income');
-    const totalExpenses = expenses.reduce((sum, s) => sum + Math.abs(s.total_amount), 0);
-
+    const income = Math.abs(summary.find(s => s.category_group_name === 'Income')?.total_amount || 0);
     const getAmount = (name: string) => 
       Math.abs(summary.find(s => s.category_group_name === name)?.total_amount || 0);
 
@@ -17,12 +15,12 @@ export function BudgetBreakdown({ summary }: BudgetBreakdownProps) {
       needs: getAmount('Needs'),
       wants: getAmount('Wants'),
       savings: getAmount('Savings'),
-      total: totalExpenses,
+      income,
     };
   }, [summary]);
 
   const getPercentage = (amount: number) => 
-    breakdown.total > 0 ? (amount / breakdown.total) * 100 : 0;
+    breakdown.income > 0 ? (amount / breakdown.income) * 100 : 0;
 
   const getStatusColor = (actual: number, target: number) => {
     const diff = Math.abs(actual - target);
