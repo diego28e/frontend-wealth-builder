@@ -79,6 +79,8 @@ export interface Account {
     type: AccountType;
     currency_code: string;
     current_balance: number;
+    interest_rate?: number;
+    is_tax_exempt?: boolean;
     is_active: boolean;
     configurations?: AccountConfiguration[];
     created_at: string;
@@ -91,6 +93,8 @@ export interface CreateAccountRequest {
     type: AccountType;
     currency_code: string;
     current_balance: number;
+    interest_rate?: number;
+    is_tax_exempt?: boolean;
     configurations?: AccountConfiguration[];
 }
 
@@ -99,6 +103,8 @@ export interface UpdateAccountRequest {
     type?: AccountType;
     currency_code?: string;
     current_balance?: number;
+    interest_rate?: number;
+    is_tax_exempt?: boolean;
     is_active?: boolean;
     configurations?: AccountConfiguration[];
 }
