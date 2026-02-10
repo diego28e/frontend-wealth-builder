@@ -14,6 +14,8 @@ export function useTransactions(userId: string | undefined, startDate?: string, 
     }
 
     async function fetchTransactions() {
+      if (!userId) return;
+      
       try {
         setIsLoading(true);
         setError(null);

@@ -55,7 +55,7 @@ export function TransactionForm({ onSuccess, onCancel }: TransactionFormProps) {
 
       if (receiptFile) {
         setIsUploadingReceipt(true);
-        const receiptData = await receiptService.uploadReceipt(receiptFile, user.id);
+        const receiptData = await receiptService.uploadReceipt(receiptFile, user.id, formData.account_id);
         if (receiptData.extracted_data) {
           transactionData.amount = receiptData.extracted_data.amount ? toCents(receiptData.extracted_data.amount) : transactionData.amount;
           transactionData.merchant_name = receiptData.extracted_data.merchant || transactionData.merchant_name;

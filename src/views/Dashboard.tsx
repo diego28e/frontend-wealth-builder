@@ -30,18 +30,12 @@ const { balance, isLoading: balanceLoading } = useBalance();
 const { summary, isLoading: summaryLoading } = useCategoryGroupSummary(user?.id, startDate, endDate);
 const { getCategoryName } = useCategories();
 
-const monthLabel = selectedDate.toLocaleDateString('en-US', { month: 'long', year: 'numeric' });
-
   const handlePreviousMonth = () => {
     setSelectedDate(new Date(selectedDate.getFullYear(), selectedDate.getMonth() - 1));
   };
 
   const handleNextMonth = () => {
     setSelectedDate(new Date(selectedDate.getFullYear(), selectedDate.getMonth() + 1));
-  };
-
-  const handleCurrentMonth = () => {
-    setSelectedDate(new Date());
   };
 
   if (transactionsLoading || balanceLoading || summaryLoading) {
