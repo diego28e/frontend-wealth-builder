@@ -15,7 +15,7 @@ import Goals from "./views/Goals";
 import Accounts from "./views/Accounts";
 import Login from "./views/Login";
 import Register from "./views/Register";
-import About from "./views/About";
+
 import { ProtectedRoute} from './components/ProtectedRoute';
 
 const rootRoute = createRootRoute({
@@ -92,14 +92,10 @@ const registerRoute = createRoute({
   component: Register,
 });
 
-const aboutRoute = createRoute({
-  getParentRoute: () => appLayoutRoute,
-  path: "/about",
-  component: About,
-});
+
 
 const routeTree = rootRoute.addChildren([
-  appLayoutRoute.addChildren([homeRoute, dashboardRoute, aboutRoute]),
+  appLayoutRoute.addChildren([homeRoute, dashboardRoute]),
   authLayoutRoute.addChildren([loginRoute, registerRoute]),
   dashboardLayoutRoute.addChildren([dashboardRoute, transactionsRoute, goalsRoute, accountsRoute])
 ]);

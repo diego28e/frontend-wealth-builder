@@ -101,7 +101,7 @@ const monthLabel = selectedDate.toLocaleDateString('en-US', { month: 'long', yea
 
       {/* Footer */}
       <footer className="mt-8 text-center text-xs text-gray-400 font-medium">
-        <p>© 2024 Wealth Builder. All rights reserved.</p>
+        <p>© {new Date().getFullYear()} Wealth Builder. All rights reserved.</p>
       </footer>
     </div>
   );

@@ -1,5 +1,5 @@
 import { Link, useLocation } from "@tanstack/react-router";
-import {LayoutDashboard, Home, Receipt, Target, Wallet, PiggyBank, LogOut} from 'lucide-react';
+import {LayoutDashboard, Receipt, Target, Wallet, LogOut} from 'lucide-react';
 import { useAuth } from '../../contexts/AuthContext';
 
 export function Sidebar() {
@@ -7,7 +7,6 @@ export function Sidebar() {
     const { user, logout } = useAuth();
 
     const navItems = [
-        {to: '/', icon:Home, label: 'Home'},
         {to: '/dashboard', icon:LayoutDashboard, label: 'Dashboard'},
         {to: '/transactions', icon:Receipt, label: 'Transactions'},
         {to: '/accounts', icon:Wallet, label: 'Accounts'},
@@ -18,9 +17,7 @@ export function Sidebar() {
         <aside className="hidden lg:flex flex-col w-64 bg-surface-light border-r border-border-color h-screen sticky top-0">
             <div className="p-6 border-b border-border-color">
                 <div className="flex items-center gap-3">
-                    <div className="w-10 h-10 rounded-lg bg-primary flex items-center justify-center">
-                        <PiggyBank className="mx-auto" size={24} />
-                    </div>
+                    <img src="/wealth-builder-logo.png" alt="Wealth Builder" className="w-10 h-10 object-contain" />
                     <span className="font-bold text-xl text-text-main"> Wealth Builder</span>
                 </div>
 
@@ -34,7 +31,7 @@ export function Sidebar() {
                         <Link
                         key={item.to}
                         to={item.to}
-                        className={`flex items-center gap-3 px-4 py-3 rounded-lg transition-colors hover:bg-primary hover:text-primary-foreground ${isActive ? 'bg-primary text-white' : 'text-text-secondary hover:bg-gray-100'}`}>
+                        className={`flex items-center gap-3 px-4 py-3 rounded-lg transition-colors hover:bg-primary hover:text-primary-foreground ${isActive ? 'bg-primary text-white' : 'text-gray-700 hover:bg-gray-100'}`}>
                         <Icon size={20} />
                         <span className="font-medium">{item.label}</span>
                         </Link>

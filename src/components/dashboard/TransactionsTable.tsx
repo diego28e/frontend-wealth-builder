@@ -89,7 +89,7 @@ export default function TransactionsTable({ transactions, getCategoryName }: Tra
                       tx.type === 'Income' ? 'text-green-600' : 'text-red-600'
                     }`}
                   >
-                    {tx.amount > 0 ? '+' : ''}{tx.currency_code} {fromCents(Math.abs(tx.amount)).toFixed(2)}
+                    {tx.type === 'Income' ? '+' : '-'}{tx.currency_code} {fromCents(Math.abs(tx.amount)).toFixed(2)}
                   </span>
                 </td>
               </tr>
