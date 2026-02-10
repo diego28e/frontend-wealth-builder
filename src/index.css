@@ -10,3 +10,11 @@
   --color-text-main: #111827;
   --color-text-secondary: #6b7280;
 }
+
+/* Global Reset for Full Height Layouts */
+html, body, #root {
+  height: 100%;
+  margin: 0;
+  padding: 0;
+  overflow: hidden; /* Prevent body scroll, let layouts handle it */
+}

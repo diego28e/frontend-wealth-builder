@@ -57,29 +57,44 @@ const monthLabel = selectedDate.toLocaleDateString('en-US', { month: 'long', yea
   return (
     <div className="space-y-8">
       {/* Header Section */}
-      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+      {/* Header Section */}
+      <div className="flex flex-col md:flex-row md:items-end justify-between gap-6">
         <div>
-          <h2 className="text-3xl font-extrabold tracking-tight text-text-main">Dashboard</h2>
-          <p className="text-text-secondary mt-1 font-medium">
-            Welcome back, {user?.first_name || ''}. Here is your financial health at a glance.
+          <h2 className="text-3xl font-extrabold tracking-tight text-gray-900">Dashboard</h2>
+          <p className="text-gray-500 mt-1 font-medium">
+            Overview of your financial health
           </p>
         </div>
-        <div className="flex gap-3">
-          <div className="flex items-center gap-2 bg-surface-light border border-border-color rounded-xl px-2 py-1">
-            <button onClick={handlePreviousMonth} className="p-1.5 rounded-lg hover:bg-gray-100 transition-colors">
-              <ChevronLeft size={16} className="text-gray-600" />
+        
+        <div className="flex items-center gap-4">
+          {/* Calendar Navigation Pill */}
+          <div className="flex items-center bg-white border border-gray-200 rounded-full p-1 shadow-sm">
+            <button 
+                onClick={handlePreviousMonth} 
+                className="p-2 rounded-full hover:bg-gray-100 text-gray-500 hover:text-gray-900 transition-colors"
+                title="Previous Month"
+            >
+              <ChevronLeft size={18} />
             </button>
-            <button onClick={handleCurrentMonth} className="px-3 py-1.5 text-sm font-bold text-text-main hover:bg-gray-100 rounded-lg transition-colors flex items-center gap-2">
-              <Calendar size={14} className="text-gray-500" />
-              {monthLabel}
-            </button>
-            <button onClick={handleNextMonth} className="p-1.5 rounded-lg hover:bg-gray-100 transition-colors">
-              <ChevronRight size={16} className="text-gray-600" />
+            <span className="px-4 py-1 text-sm font-bold text-gray-800 min-w-[100px] text-center select-none flex items-center justify-center gap-2">
+                <Calendar size={14} className="text-primary/70" />
+                {selectedDate.toLocaleDateString('en-US', { month: 'short', year: 'numeric' })}
+            </span>
+            <button 
+                onClick={handleNextMonth} 
+                className="p-2 rounded-full hover:bg-gray-100 text-gray-500 hover:text-gray-900 transition-colors"
+                title="Next Month"
+            >
+              <ChevronRight size={18} />
             </button>
           </div>
-          <button onClick={() => navigate({to:'/transactions'})} className="px-5 py-2.5 bg-primary text-white rounded-xl text-sm font-bold shadow-lg shadow-green-500/30 hover:bg-primary-hover transition-all flex items-center gap-2 transform active:scale-95 cursor-pointer">
-            <Plus size={18} strokeWidth={3} />
-            Add Transaction
+
+          <button 
+            onClick={() => navigate({to:'/transactions'})} 
+            className="flex items-center gap-2 px-5 py-2.5 bg-primary text-white rounded-full text-sm font-bold shadow-lg shadow-primary/20 hover:bg-primary-hover hover:shadow-primary/30 transition-all transform active:scale-95"
+          >
+            <Plus size={18} strokeWidth={2.5} />
+            <span className="hidden sm:inline">Add Transaction</span>
           </button>
         </div>
       </div>

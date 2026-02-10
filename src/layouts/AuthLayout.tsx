@@ -3,15 +3,14 @@ import { TrendingUp, ShieldCheck, PieChart } from "lucide-react";
 
 export default function AuthLayout() {
   return (
-    <div className="min-h-screen bg-gray-50 flex">
+    <div className="h-full w-full bg-gray-50 flex overflow-hidden">
       {/* Left Side - Branding & Testimonials (Hidden on mobile) */}
-      <div className="hidden lg:flex lg:w-1/2 bg-gray-900 text-white relative overflow-hidden flex-col justify-between p-12">
+      <div className="hidden lg:flex lg:w-1/2 bg-gray-900 text-white relative flex-col justify-between p-12 overflow-hidden">
         <div className="absolute inset-0 bg-[url('https://images.unsplash.com/photo-1579621970563-ebec7560ff3e?q=80&w=2071&auto=format&fit=crop')] bg-cover bg-center opacity-10"></div>
         <div className="absolute inset-0 bg-gradient-to-b from-gray-900/50 to-gray-900/90"></div>
         
         <div className="relative z-10">
           <div className="flex items-center gap-3 mb-12">
-             {/* We can use a white version of logo if available, or just text for now */}
              <div className="bg-primary/20 p-2 rounded-lg backdrop-blur-sm border border-primary/30">
                <img src="/wealth-builder-logo.png" alt="Wealth Builder" className="w-8 h-8 object-contain brightness-0 invert" />
              </div>
@@ -47,7 +46,7 @@ export default function AuthLayout() {
       </div>
 
       {/* Right Side - Form */}
-      <div className="w-full lg:w-1/2 flex items-center justify-center p-6 lg:p-12">
+      <div className="w-full lg:w-1/2 flex items-center justify-center p-6 lg:p-12 overflow-y-auto h-full">
         <div className="w-full max-w-md">
             <div className="lg:hidden text-center mb-8">
                 <img src="/wealth-builder-logo.png" alt="Wealth Builder" className="w-12 h-12 mx-auto mb-3" />
