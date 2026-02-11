@@ -1,5 +1,5 @@
 import { ArrowUpRight, ArrowDownRight } from 'lucide-react';
-import { fromCents } from '../../lib/currency';
+import { fromCents, formatCurrency } from '../../lib/currency';
 import type { Transaction } from '../../types/api';
 
 interface TransactionsTableProps {
@@ -8,7 +8,10 @@ interface TransactionsTableProps {
 }
 
 export default function TransactionsTable({ transactions, getCategoryName }: TransactionsTableProps) {
-  if (transactions.length === 0) {
+  // Ensure we always have an array
+  const safeTransactions = Array.isArray(transactions) ? transactions : [];
+
+  if (safeTransactions.length === 0) {
     return (
       <div className="bg-surface-light rounded-xl border border-border-color overflow-hidden">
         <div className="p-6 border-b border-border-color">
@@ -48,7 +51,7 @@ export default function TransactionsTable({ transactions, getCategoryName }: Tra
             </tr>
           </thead>
           <tbody className="divide-y divide-border-color">
-            {transactions.map((tx) => (
+            {safeTransactions.map((tx) => (
               <tr key={tx.id} className="hover:bg-gray-50 transition-colors">
                 <td className="px-6 py-4">
                   <div className="flex items-center gap-3">
@@ -89,7 +92,7 @@ export default function TransactionsTable({ transactions, getCategoryName }: Tra
                       tx.type === 'Income' ? 'text-green-600' : 'text-red-600'
                     }`}
                   >
-                    {tx.type === 'Income' ? '+' : '-'}{tx.currency_code} {fromCents(Math.abs(tx.amount)).toFixed(2)}
+                    {tx.type === 'Income' ? '+' : '-'}{tx.currency_code} {formatCurrency(fromCents(Math.abs(tx.amount)))}
                   </span>
                 </td>
               </tr>

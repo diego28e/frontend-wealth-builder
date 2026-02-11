@@ -14,7 +14,11 @@ export const transactionService = {
             url += `?start_date=${startDate}&end_date=${endDate}`;
         }
 
-        return apiClient<Transaction[]>(url);
+        // Create a type for the paginated response locally or import it if added to types
+        // For now, allow any to handle the structure flexibly
+        const response = await apiClient<{ data: Transaction[], meta: any }>(url);
+        // Return just the data array to keep the rest of the app working
+        return response.data || [];
     },
     async getTransactionById(id:string):Promise<Transaction> {
         return apiClient<Transaction>(`/transactions/${id}`);

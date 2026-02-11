@@ -121,6 +121,12 @@ export function TransactionSidebar({ isOpen, onClose, onSuccess }: TransactionSi
     setFormData(prev => ({ ...prev, [name]: value }));
   };
 
+  const focusClass = formData.type === 'Income' 
+    ? 'focus:ring-green-500/20 focus:border-green-500' 
+    : 'focus:ring-red-500/20 focus:border-red-500';
+
+  const iconClass = formData.type === 'Income' ? 'text-green-500' : 'text-red-500';
+
   return (
     <>
       {/* Backdrop */}
@@ -169,38 +175,50 @@ export function TransactionSidebar({ isOpen, onClose, onSuccess }: TransactionSi
           {/* Content */}
           <div className="flex-1 overflow-y-auto p-6">
             {activeTab === 'manual' ? (
-              <form onSubmit={handleManualSubmit} className="space-y-6">
+              <form 
+                onSubmit={handleManualSubmit} 
+                className={`flex flex-col gap-5 p-6 rounded-2xl border transition-all duration-300 bg-white ${
+                  formData.type === 'Income' 
+                    ? 'border-green-200 shadow-[0_4px_20px_-4px_rgba(34,197,94,0.1)]' 
+                    : 'border-red-200 shadow-[0_4px_20px_-4px_rgba(239,68,68,0.1)]'
+                }`}
+              >
                 {/* Type Selection */}
-                <div className="grid grid-cols-2 gap-3 p-1 bg-gray-50 rounded-xl">
-                  <button
-                    type="button"
-                    onClick={() => setFormData(prev => ({ ...prev, type: 'Income' }))}
-                    className={`py-2 rounded-lg text-sm font-semibold transition-all ${
-                      formData.type === 'Income'
-                        ? 'bg-white text-green-600 shadow-sm'
-                        : 'text-gray-500 hover:text-gray-700'
-                    }`}
-                  >
-                    Income
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => setFormData(prev => ({ ...prev, type: 'Expense' }))}
-                    className={`py-2 rounded-lg text-sm font-semibold transition-all ${
-                      formData.type === 'Expense'
-                        ? 'bg-white text-red-600 shadow-sm'
-                        : 'text-gray-500 hover:text-gray-700'
-                    }`}
-                  >
-                    Expense
-                  </button>
+                <div>
+                  <label className="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-2">
+                    Transaction Type
+                  </label>
+                  <div className="grid grid-cols-2 gap-2">
+                    <button
+                      type="button"
+                      onClick={() => setFormData(prev => ({ ...prev, type: 'Income' }))}
+                      className={`h-10 rounded-lg border flex items-center justify-center text-sm font-medium transition-all ${
+                        formData.type === 'Income'
+                          ? 'bg-green-100 text-green-700 border-green-500 shadow-sm'
+                          : 'border-border-color bg-white text-gray-500 hover:bg-gray-50'
+                      }`}
+                    >
+                      Income
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => setFormData(prev => ({ ...prev, type: 'Expense' }))}
+                      className={`h-10 rounded-lg border flex items-center justify-center text-sm font-medium transition-all ${
+                        formData.type === 'Expense'
+                          ? 'bg-red-100 text-red-700 border-red-500 shadow-sm'
+                          : 'border-border-color bg-white text-gray-500 hover:bg-gray-50'
+                      }`}
+                    >
+                      Expense
+                    </button>
+                  </div>
                 </div>
 
                 {/* Amount */}
                 <div>
                   <label className="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-2">Amount</label>
                   <div className="relative">
-                    <DollarSign className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400" size={20} />
+                    <DollarSign className={`absolute left-4 top-1/2 -translate-y-1/2 transition-colors ${iconClass}`} size={20} />
                     <input
                       name="amount"
                       type="number"
@@ -209,7 +227,13 @@ export function TransactionSidebar({ isOpen, onClose, onSuccess }: TransactionSi
                       value={formData.amount}
                       onChange={handleInputChange}
                       placeholder="0.00"
-                      className="w-full pl-11 pr-4 py-3 bg-gray-50 border border-gray-200 rounded-xl text-lg font-bold text-gray-900 focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all outline-none"
+                      className={`w-full pl-11 pr-4 py-3 bg-white border border-gray-200 rounded-xl text-lg font-bold text-gray-900 focus:ring-2 transition-all outline-none ${focusClass}`}
+                      onWheel={(e) => e.currentTarget.blur()}
+                      onKeyDown={(e) => {
+                        if (e.key === 'ArrowUp' || e.key === 'ArrowDown') {
+                          e.preventDefault();
+                        }
+                      }}
                     />
                   </div>
                 </div>
@@ -219,13 +243,13 @@ export function TransactionSidebar({ isOpen, onClose, onSuccess }: TransactionSi
                   <div>
                     <label className="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-2">Account</label>
                     <div className="relative">
-                       <CreditCard className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" size={16} />
+                       <CreditCard className={`absolute left-3 top-1/2 -translate-y-1/2 transition-colors ${iconClass}`} size={16} />
                       <select
                         name="account_id"
                         required
                         value={formData.account_id}
                         onChange={handleInputChange}
-                        className="w-full pl-9 pr-8 py-2.5 bg-gray-50 border border-gray-200 rounded-lg text-sm font-medium text-gray-900 focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all outline-none appearance-none"
+                        className={`w-full pl-9 pr-8 py-2.5 bg-white border border-gray-200 rounded-lg text-sm font-medium text-gray-900 focus:ring-2 transition-all outline-none appearance-none ${focusClass}`}
                       >
                         <option value="">Select</option>
                         {accounts.map(acc => (
@@ -237,14 +261,14 @@ export function TransactionSidebar({ isOpen, onClose, onSuccess }: TransactionSi
                   <div>
                     <label className="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-2">Date</label>
                     <div className="relative">
-                      <Calendar className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" size={16} />
+                      <Calendar className={`absolute left-3 top-1/2 -translate-y-1/2 transition-colors ${iconClass}`} size={16} />
                       <input
                         name="date"
                         type="date"
                         required
                         value={formData.date}
                         onChange={handleInputChange}
-                        className="w-full pl-10 pr-4 py-2.5 bg-gray-50 border border-gray-200 rounded-lg text-sm font-medium text-gray-900 focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all outline-none"
+                        className="w-full pl-10 pr-4 py-2.5 bg-white border border-gray-200 rounded-lg text-sm font-medium text-gray-900 focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all outline-none"
                       />
                     </div>
                   </div>
@@ -258,7 +282,7 @@ export function TransactionSidebar({ isOpen, onClose, onSuccess }: TransactionSi
                     required
                     value={formData.category_id}
                     onChange={handleInputChange}
-                    className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl text-sm font-medium text-gray-900 focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all outline-none"
+                    className={`w-full px-4 py-3 bg-white border border-gray-200 rounded-xl text-sm font-medium text-gray-900 focus:ring-2 transition-all outline-none ${focusClass}`}
                   >
                     <option value="">Select Category</option>
                     {categories.map(cat => (
@@ -272,14 +296,14 @@ export function TransactionSidebar({ isOpen, onClose, onSuccess }: TransactionSi
                   <div>
                     <label className="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-2">Merchant</label>
                     <div className="relative">
-                      <Store className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" size={18} />
+                      <Store className={`absolute left-3 top-1/2 -translate-y-1/2 transition-colors ${iconClass}`} size={18} />
                       <input
                         name="merchant_name"
                         type="text"
                         value={formData.merchant_name}
                         onChange={handleInputChange}
                         placeholder="e.g. Starbucks"
-                        className="w-full pl-10 pr-4 py-2.5 bg-gray-50 border border-gray-200 rounded-lg text-sm font-medium text-gray-900 focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all outline-none"
+                        className="w-full pl-10 pr-4 py-2.5 bg-white border border-gray-200 rounded-lg text-sm font-medium text-gray-900 focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all outline-none"
                       />
                     </div>
                   </div>
@@ -291,7 +315,7 @@ export function TransactionSidebar({ isOpen, onClose, onSuccess }: TransactionSi
                       onChange={handleInputChange}
                       placeholder="What was this for?"
                       rows={3}
-                      className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl text-sm font-medium text-gray-900 focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all outline-none resize-none"
+                      className={`w-full px-4 py-3 bg-white border border-gray-200 rounded-xl text-sm font-medium text-gray-900 focus:ring-2 transition-all outline-none resize-none ${focusClass}`}
                     />
                   </div>
                 </div>
@@ -362,7 +386,11 @@ export function TransactionSidebar({ isOpen, onClose, onSuccess }: TransactionSi
               <button
                 onClick={handleManualSubmit}
                 disabled={isSubmitting}
-                className="w-full py-3.5 bg-primary text-white font-bold rounded-xl shadow-lg shadow-primary/20 hover:bg-primary-hover active:scale-95 transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+                className={`w-full py-3.5 text-white font-bold rounded-xl shadow-lg hover:shadow-xl active:scale-95 transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2 ${
+                  formData.type === 'Income'
+                   ? 'bg-green-600 hover:bg-green-700 shadow-green-200'
+                   : 'bg-red-600 hover:bg-red-700 shadow-red-200'
+                }`}
               >
                 {isSubmitting ? (
                   <>
@@ -370,7 +398,7 @@ export function TransactionSidebar({ isOpen, onClose, onSuccess }: TransactionSi
                     Saving...
                   </>
                 ) : (
-                  'Add Transaction'
+                  `Add ${formData.type}`
                 )}
               </button>
             ) : (

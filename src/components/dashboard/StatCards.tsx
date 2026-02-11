@@ -1,6 +1,6 @@
 import { TrendingUp, TrendingDown, DollarSign } from 'lucide-react';
 import type { Transaction, UserBalance } from '../../types/api';
-import { fromCents } from '../../lib/currency';
+import { fromCents, formatCurrency } from '../../lib/currency';
 import { useMemo } from 'react';
 
 interface StatCardsProps {
@@ -10,11 +10,14 @@ interface StatCardsProps {
 
 export default function StatCards({ transactions, balance }: StatCardsProps) {
   const stats = useMemo(() => {
-    const totalIncome = transactions
+    // Validating that transactions is an array before filtering
+    const safeTransactions = Array.isArray(transactions) ? transactions : [];
+    
+    const totalIncome = safeTransactions
       .filter((tx) => tx.type === 'Income')
       .reduce((sum, tx) => sum + tx.amount, 0);
 
-    const totalExpenses = transactions
+    const totalExpenses = safeTransactions
       .filter((tx) => tx.type === 'Expense')
       .reduce((sum, tx) => sum + Math.abs(tx.amount), 0);
 
@@ -25,21 +28,21 @@ export default function StatCards({ transactions, balance }: StatCardsProps) {
     return [
       {
         label: 'Total Balance',
-        value: `${currencyCode} ${fromCents(currentBalance).toLocaleString()}`,
-        change: `From ${currencyCode} ${fromCents(startingBalance).toLocaleString()}`,
+        value: `${currencyCode} ${formatCurrency(fromCents(currentBalance))}`,
+        change: `From ${currencyCode} ${formatCurrency(fromCents(startingBalance))}`,
         trend: 'neutral' as const,
         icon: DollarSign,
       },
       {
         label: 'Income',
-        value: `${currencyCode} ${fromCents(totalIncome).toLocaleString()}`,
+        value: `${currencyCode} ${formatCurrency(fromCents(totalIncome))}`,
         change: 'This period',
         trend: 'up' as const,
         icon: TrendingUp,
       },
       {
         label: 'Expenses',
-        value: `${currencyCode} ${fromCents(totalExpenses).toLocaleString()}`,
+        value: `${currencyCode} ${formatCurrency(fromCents(totalExpenses))}`,
         change: 'This period',
         trend: 'down' as const,
         icon: TrendingDown,

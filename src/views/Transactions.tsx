@@ -8,10 +8,30 @@ import { TransactionSidebar } from '../components/transactions/TransactionSideba
 
 export default function Transactions() {
   const { user } = useAuth();
-  const { transactions, isLoading, error } = useTransactions(user?.id);
+  
+  // Default to fetching the current year's transactions to avoid backend truncation of "recent" items
+  // which might happen with unbounded queries.
+  const { startDate, endDate } = useState(() => {
+    const now = new Date();
+    const start = new Date(now.getFullYear(), 0, 1); // Jan 1st
+    const end = new Date(now.getFullYear(), 11, 31); // Dec 31st
+    return {
+      startDate: start.toISOString().split('T')[0],
+      endDate: end.toISOString().split('T')[0]
+    };
+  })[0];
+
+  const { transactions, isLoading, error } = useTransactions(user?.id, startDate, endDate);
   const { getCategoryName } = useCategories();
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
+  const [isSortOpen, setIsSortOpen] = useState(false);
   const [sortOrder, setSortOrder] = useState<'newest' | 'oldest'>('newest');
+  const [selectedCurrency, setSelectedCurrency] = useState<string>('ALL');
+  const [isCurrencyOpen, setIsCurrencyOpen] = useState(false);
+
+  // Extract unique currencies from transactions
+  const safeTransactions = Array.isArray(transactions) ? transactions : [];
+  const availableCurrencies = Array.from(new Set(safeTransactions.map(t => t.currency_code)));
 
   // Success handler to refresh data could be added here if useTransactions exposed a refetch method
   // For now, we'll just close the sidebar. In a real app, query invalidation (React Query) would handle this automatically.
@@ -30,11 +50,19 @@ export default function Transactions() {
     window.location.reload(); 
   };
 
-  const sortedTransactions = [...transactions].sort((a, b) => {
-      const dateA = new Date(a.date).getTime();
-      const dateB = new Date(b.date).getTime();
-      return sortOrder === 'newest' ? dateB - dateA : dateA - dateB;
+  const filteredTransactions = safeTransactions.filter(t => {
+      // Filter by currency
+      if (selectedCurrency !== 'ALL' && t.currency_code !== selectedCurrency) return false;
+      return true;
   });
+
+  const sortedTransactions = Array.isArray(filteredTransactions) 
+      ? [...filteredTransactions].sort((a, b) => {
+          const dateA = new Date(a.date).getTime();
+          const dateB = new Date(b.date).getTime();
+          return sortOrder === 'newest' ? dateB - dateA : dateA - dateB;
+      })
+      : [];
 
   if (isLoading) {
     return (
@@ -95,22 +123,75 @@ export default function Transactions() {
 
       {/* Filters Toolbar */}
       <div className="flex flex-wrap items-center gap-3 mb-6">
-        <button className="flex items-center gap-2 px-4 py-2 bg-surface-light border border-border-color rounded-xl text-sm font-medium hover:border-primary transition-colors text-text-secondary shadow-sm group">
-          <DollarSign size={18} className="text-gray-400 group-hover:text-primary transition-colors" />
-          Currency: <span className="text-text-main font-bold ml-1">USD</span>
-          <ChevronDown size={16} className="text-gray-400" />
-        </button>
-        
-        <div className="relative group">
-            <button className="flex items-center gap-2 px-4 py-2 bg-surface-light border border-border-color rounded-xl text-sm font-medium hover:border-primary transition-colors text-text-secondary shadow-sm">
-            <Calendar size={18} className="text-gray-400 group-hover:text-primary transition-colors" />
-            Sort: <span className="text-text-main font-bold ml-1">{sortOrder === 'newest' ? 'Newest First' : 'Oldest First'}</span>
-            <ChevronDown size={16} className="text-gray-400" />
+        <div className="relative">
+            {isCurrencyOpen && (
+              <div 
+                className="fixed inset-0 z-0 bg-transparent"
+                onClick={() => setIsCurrencyOpen(false)} 
+              />
+            )}
+            <button 
+              onClick={() => setIsCurrencyOpen(!isCurrencyOpen)}
+              className="relative z-10 flex items-center gap-2 px-4 py-2 bg-surface-light border border-border-color rounded-xl text-sm font-medium hover:border-primary transition-colors text-text-secondary shadow-sm group"
+            >
+              <DollarSign size={18} className={`text-gray-400 transition-colors ${isCurrencyOpen ? 'text-primary' : 'group-hover:text-primary'}`} />
+              Currency: <span className="text-text-main font-bold ml-1">{selectedCurrency === 'ALL' ? 'All' : selectedCurrency}</span>
+              <ChevronDown size={16} className={`text-gray-400 transition-transform duration-200 ${isCurrencyOpen ? 'rotate-180' : ''}`} />
             </button>
-            <div className="absolute top-full left-0 mt-2 w-48 bg-white rounded-xl shadow-xl border border-gray-100 py-1 z-10 hidden group-hover:block animate-in fade-in zoom-in-95 duration-200">
-                <button onClick={() => setSortOrder('newest')} className="w-full text-left px-4 py-2 text-sm hover:bg-gray-50 text-gray-700">Newest First</button>
-                <button onClick={() => setSortOrder('oldest')} className="w-full text-left px-4 py-2 text-sm hover:bg-gray-50 text-gray-700">Oldest First</button>
-            </div>
+            
+            {isCurrencyOpen && (
+              <div className="absolute top-full left-0 mt-2 w-48 bg-white rounded-xl shadow-xl border border-gray-100 py-1 z-10 animate-in fade-in zoom-in-95 duration-200">
+                  <button 
+                    onClick={() => { setSelectedCurrency('ALL'); setIsCurrencyOpen(false); }} 
+                    className={`w-full text-left px-4 py-2 text-sm hover:bg-gray-50 transition-colors ${selectedCurrency === 'ALL' ? 'text-primary font-bold bg-primary/5' : 'text-gray-700'}`}
+                  >
+                    All Currencies
+                  </button>
+                  {availableCurrencies.map(currency => (
+                    <button 
+                      key={currency}
+                      onClick={() => { setSelectedCurrency(currency); setIsCurrencyOpen(false); }} 
+                      className={`w-full text-left px-4 py-2 text-sm hover:bg-gray-50 transition-colors ${selectedCurrency === currency ? 'text-primary font-bold bg-primary/5' : 'text-gray-700'}`}
+                    >
+                      {currency}
+                    </button>
+                  ))}
+              </div>
+            )}
+        </div>
+        
+        <div className="relative">
+            {isSortOpen && (
+              <div 
+                className="fixed inset-0 z-0 bg-transparent"
+                onClick={() => setIsSortOpen(false)} 
+              />
+            )}
+            <button 
+              onClick={() => setIsSortOpen(!isSortOpen)}
+              className="relative z-10 flex items-center gap-2 px-4 py-2 bg-surface-light border border-border-color rounded-xl text-sm font-medium hover:border-primary transition-colors text-text-secondary shadow-sm group"
+            >
+              <Calendar size={18} className={`text-gray-400 transition-colors ${isSortOpen ? 'text-primary' : 'group-hover:text-primary'}`} />
+              Sort: <span className="text-text-main font-bold ml-1">{sortOrder === 'newest' ? 'Newest First' : 'Oldest First'}</span>
+              <ChevronDown size={16} className={`text-gray-400 transition-transform duration-200 ${isSortOpen ? 'rotate-180' : ''}`} />
+            </button>
+            
+            {isSortOpen && (
+              <div className="absolute top-full left-0 mt-2 w-48 bg-white rounded-xl shadow-xl border border-gray-100 py-1 z-10 animate-in fade-in zoom-in-95 duration-200">
+                  <button 
+                    onClick={() => { setSortOrder('newest'); setIsSortOpen(false); }} 
+                    className={`w-full text-left px-4 py-2 text-sm hover:bg-gray-50 transition-colors ${sortOrder === 'newest' ? 'text-primary font-bold bg-primary/5' : 'text-gray-700'}`}
+                  >
+                    Newest First
+                  </button>
+                  <button 
+                    onClick={() => { setSortOrder('oldest'); setIsSortOpen(false); }} 
+                    className={`w-full text-left px-4 py-2 text-sm hover:bg-gray-50 transition-colors ${sortOrder === 'oldest' ? 'text-primary font-bold bg-primary/5' : 'text-gray-700'}`}
+                  >
+                    Oldest First
+                  </button>
+              </div>
+            )}
         </div>
 
         <button className="flex items-center gap-2 px-4 py-2 bg-surface-light border border-border-color rounded-xl text-sm font-medium hover:border-primary transition-colors text-text-secondary shadow-sm group">

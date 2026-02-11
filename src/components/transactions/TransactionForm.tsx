@@ -87,10 +87,24 @@ export function TransactionForm({ onSuccess, onCancel }: TransactionFormProps) {
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
     const { name, value } = e.target;
     setFormData(prev => ({ ...prev, [name]: value }));
+    setFormData(prev => ({ ...prev, [name]: value }));
   };
 
+  const focusClass = formData.type === 'Income' 
+    ? 'focus:ring-green-500/20 focus:border-green-500' 
+    : 'focus:ring-red-500/20 focus:border-red-500';
+
+  const iconClass = formData.type === 'Income' ? 'text-green-500' : 'text-red-500';
+
   return (
-    <form onSubmit={handleSubmit} className="flex flex-col gap-5">
+    <form 
+      onSubmit={handleSubmit} 
+      className={`flex flex-col gap-5 p-6 rounded-2xl border transition-all duration-300 bg-surface-light ${
+        formData.type === 'Income' 
+          ? 'border-green-200 shadow-[0_4px_20px_-4px_rgba(34,197,94,0.1)]' 
+          : 'border-red-200 shadow-[0_4px_20px_-4px_rgba(239,68,68,0.1)]'
+      }`}
+    >
       {/* Type Selection */}
       <div>
         <label className="block text-xs font-bold text-text-secondary uppercase tracking-wider mb-2">
@@ -102,8 +116,8 @@ export function TransactionForm({ onSuccess, onCancel }: TransactionFormProps) {
             onClick={() => setFormData(prev => ({ ...prev, type: 'Income' }))}
             className={`h-10 rounded-lg border flex items-center justify-center text-sm font-medium transition-all ${
               formData.type === 'Income'
-                ? 'bg-green-100 text-green-700 border-green-500'
-                : 'border-border-color bg-surface-light text-text-secondary'
+                ? 'bg-green-100 text-green-700 border-green-500 shadow-sm'
+                : 'border-border-color bg-white text-text-secondary hover:bg-gray-50'
             }`}
           >
             Income
@@ -113,8 +127,8 @@ export function TransactionForm({ onSuccess, onCancel }: TransactionFormProps) {
             onClick={() => setFormData(prev => ({ ...prev, type: 'Expense' }))}
             className={`h-10 rounded-lg border flex items-center justify-center text-sm font-medium transition-all ${
               formData.type === 'Expense'
-                ? 'bg-red-100 text-red-700 border-red-500'
-                : 'border-border-color bg-surface-light text-text-secondary'
+                ? 'bg-red-100 text-red-700 border-red-500 shadow-sm'
+                : 'border-border-color bg-white text-text-secondary hover:bg-gray-50'
             }`}
           >
             Expense
@@ -131,7 +145,7 @@ export function TransactionForm({ onSuccess, onCancel }: TransactionFormProps) {
           name="account_id"
           value={formData.account_id}
           onChange={handleInputChange}
-          className="w-full h-11 px-4 bg-surface-light border border-border-color rounded-lg text-text-main text-sm focus:ring-2 focus:ring-primary focus:border-primary"
+          className="w-full h-11 px-4 bg-white border border-border-color rounded-lg text-text-main text-sm focus:ring-2 focus:ring-primary focus:border-primary shadow-sm"
           required
         >
           <option value="">Select account</option>
@@ -149,16 +163,22 @@ export function TransactionForm({ onSuccess, onCancel }: TransactionFormProps) {
           Amount
         </label>
         <div className="relative">
-          <DollarSign size={18} className="absolute left-3 top-1/2 -translate-y-1/2 text-text-secondary" />
+          <DollarSign size={18} className={`absolute left-3 top-1/2 -translate-y-1/2 transition-colors ${iconClass}`} />
           <input
             name="amount"
             value={formData.amount}
             onChange={handleInputChange}
-            className="w-full h-11 pl-10 pr-4 bg-surface-light border border-border-color rounded-lg text-text-main font-bold focus:ring-2 focus:ring-primary focus:border-primary"
+            className={`w-full h-11 pl-10 pr-4 bg-surface-light border border-border-color rounded-lg text-text-main font-bold focus:ring-2 transition-all ${focusClass}`}
             placeholder="0.00"
             type="number"
             step="0.01"
             required
+            onWheel={(e) => e.currentTarget.blur()}
+            onKeyDown={(e) => {
+              if (e.key === 'ArrowUp' || e.key === 'ArrowDown') {
+                e.preventDefault();
+              }
+            }}
           />
         </div>
       </div>
@@ -169,12 +189,12 @@ export function TransactionForm({ onSuccess, onCancel }: TransactionFormProps) {
           Merchant
         </label>
         <div className="relative">
-          <Store size={18} className="absolute left-3 top-1/2 -translate-y-1/2 text-text-secondary" />
+          <Store size={18} className={`absolute left-3 top-1/2 -translate-y-1/2 transition-colors ${iconClass}`} />
           <input
             name="merchant_name"
             value={formData.merchant_name}
             onChange={handleInputChange}
-            className="w-full h-11 pl-10 pr-4 bg-surface-light border border-border-color rounded-lg text-text-main text-sm focus:ring-2 focus:ring-primary focus:border-primary"
+            className="w-full h-11 pl-10 pr-4 bg-white border border-border-color rounded-lg text-text-main text-sm focus:ring-2 focus:ring-primary focus:border-primary shadow-sm"
             placeholder="e.g. Starbucks, Uber"
             type="text"
           />
@@ -187,12 +207,12 @@ export function TransactionForm({ onSuccess, onCancel }: TransactionFormProps) {
           Date
         </label>
         <div className="relative">
-          <Calendar size={18} className="absolute left-3 top-1/2 -translate-y-1/2 text-text-secondary" />
+          <Calendar size={18} className={`absolute left-3 top-1/2 -translate-y-1/2 transition-colors ${iconClass}`} />
           <input
             name="date"
             value={formData.date}
             onChange={handleInputChange}
-            className="w-full h-11 pl-10 pr-4 bg-surface-light border border-border-color rounded-lg text-text-main text-sm focus:ring-2 focus:ring-primary focus:border-primary"
+            className="w-full h-11 pl-10 pr-4 bg-white border border-border-color rounded-lg text-text-main text-sm focus:ring-2 focus:ring-primary focus:border-primary shadow-sm"
             type="date"
             required
           />
@@ -208,7 +228,7 @@ export function TransactionForm({ onSuccess, onCancel }: TransactionFormProps) {
           name="category_id"
           value={formData.category_id}
           onChange={handleInputChange}
-          className="w-full h-11 px-4 bg-surface-light border border-border-color rounded-lg text-text-main text-sm focus:ring-2 focus:ring-primary focus:border-primary"
+          className="w-full h-11 px-4 bg-white border border-border-color rounded-lg text-text-main text-sm focus:ring-2 focus:ring-primary focus:border-primary shadow-sm"
           required
         >
           <option value="">Select category</option>
@@ -231,7 +251,7 @@ export function TransactionForm({ onSuccess, onCancel }: TransactionFormProps) {
             type="file"
             accept="image/*,.pdf"
             onChange={(e) => setReceiptFile(e.target.files?.[0] || null)}
-            className="w-full h-11 pl-10 pr-4 bg-surface-light border border-border-color rounded-lg text-text-main text-sm focus:ring-2 focus:ring-primary focus:border-primary file:mr-4 file:py-1 file:px-2 file:rounded file:border-0 file:text-xs file:bg-primary/10 file:text-primary"
+            className={`w-full h-11 pl-10 pr-4 bg-surface-light border border-border-color rounded-lg text-text-main text-sm focus:ring-2 transition-all ${focusClass} file:mr-4 file:py-1 file:px-2 file:rounded file:border-0 file:text-xs file:bg-primary/10 file:text-primary`}
           />
         </div>
         {receiptFile && (
@@ -245,12 +265,12 @@ export function TransactionForm({ onSuccess, onCancel }: TransactionFormProps) {
           Description
         </label>
         <div className="relative">
-          <FileText size={18} className="absolute left-3 top-3 text-text-secondary" />
+          <FileText size={18} className={`absolute left-3 top-3 transition-colors ${iconClass}`} />
           <textarea
             name="description"
             value={formData.description}
             onChange={handleInputChange}
-            className="w-full p-3 pl-10 bg-surface-light border border-border-color rounded-lg text-text-main text-sm focus:ring-2 focus:ring-primary focus:border-primary resize-none"
+            className={`w-full p-3 pl-10 bg-surface-light border border-border-color rounded-lg text-text-main text-sm focus:ring-2 transition-all resize-none ${focusClass}`}
             placeholder="Add a description..."
             rows={3}
             required
@@ -264,7 +284,7 @@ export function TransactionForm({ onSuccess, onCancel }: TransactionFormProps) {
           <button
             type="button"
             onClick={onCancel}
-            className="flex-1 h-11 border border-border-color text-text-main font-bold rounded-lg hover:bg-gray-100 transition-colors"
+            className="flex-1 h-11 border border-border-color bg-surface-light text-text-main font-bold rounded-lg hover:bg-gray-50 transition-colors"
           >
             Cancel
           </button>
@@ -272,9 +292,13 @@ export function TransactionForm({ onSuccess, onCancel }: TransactionFormProps) {
         <button
           type="submit"
           disabled={isSubmitting || isUploadingReceipt}
-          className="flex-1 h-11 bg-primary text-white font-bold rounded-lg hover:bg-primary-hover transition-colors shadow-lg shadow-green-500/30 disabled:opacity-50"
+          className={`flex-1 h-11 text-white font-bold rounded-lg transition-all shadow-lg active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed ${
+            formData.type === 'Income'
+             ? 'bg-green-600 hover:bg-green-700 shadow-green-200'
+             : 'bg-red-600 hover:bg-red-700 shadow-red-200'
+          }`}
         >
-          {isUploadingReceipt ? 'Processing Receipt...' : isSubmitting ? 'Adding...' : 'Add Transaction'}
+          {isUploadingReceipt ? 'Processing Receipt...' : isSubmitting ? 'Adding...' : `Add ${formData.type}`}
         </button>
       </div>
     </form>

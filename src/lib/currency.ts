@@ -19,3 +19,15 @@ export function toCents(amount: string | number): number {
 export function fromCents(cents: number): number {
   return cents / 100;
 }
+
+/**
+ * Formats a currency amount with thousands separators
+ * Example: 20000.00 -> "20,000.00"
+ */
+export function formatCurrency(amount: number): string {
+  return new Intl.NumberFormat('en-US', {
+    style: 'decimal',
+    minimumFractionDigits: 2,
+    maximumFractionDigits: 2,
+  }).format(amount);
+}
