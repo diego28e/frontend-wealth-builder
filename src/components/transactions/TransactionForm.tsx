@@ -41,11 +41,18 @@ export function TransactionForm({ onSuccess, onCancel }: TransactionFormProps) {
       const selectedAccount = accounts.find(acc => acc.id === formData.account_id);
       if (!selectedAccount) return;
 
+      
+      // Create a date object from the input string (YYYY-MM-DD)
+      // We append the current time to preserve the timezone and avoid UTC midnight shifts
+      const dateObj = new Date(formData.date);
+      const now = new Date();
+      dateObj.setHours(now.getHours(), now.getMinutes(), now.getSeconds());
+      
       let transactionData: CreateTransactionRequest = {
         user_id: user.id,
         account_id: formData.account_id,
         category_id: formData.category_id,
-        date: new Date(formData.date).toISOString(),
+        date: dateObj.toISOString(),
         amount: toCents(formData.amount),
         type: formData.type,
         description: formData.description,
