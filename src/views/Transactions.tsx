@@ -11,6 +11,7 @@ export default function Transactions() {
   const { transactions, isLoading, error } = useTransactions(user?.id);
   const { getCategoryName } = useCategories();
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
+  const [sortOrder, setSortOrder] = useState<'newest' | 'oldest'>('newest');
 
   // Success handler to refresh data could be added here if useTransactions exposed a refetch method
   // For now, we'll just close the sidebar. In a real app, query invalidation (React Query) would handle this automatically.
@@ -28,6 +29,12 @@ export default function Transactions() {
     // Wait, useAccounts has refetch, useTransactions does not. I should probably add it later.
     window.location.reload(); 
   };
+
+  const sortedTransactions = [...transactions].sort((a, b) => {
+      const dateA = new Date(a.date).getTime();
+      const dateB = new Date(b.date).getTime();
+      return sortOrder === 'newest' ? dateB - dateA : dateA - dateB;
+  });
 
   if (isLoading) {
     return (
@@ -94,16 +101,22 @@ export default function Transactions() {
           <ChevronDown size={16} className="text-gray-400" />
         </button>
         
-        <button className="flex items-center gap-2 px-4 py-2 bg-surface-light border border-border-color rounded-xl text-sm font-medium hover:border-primary transition-colors text-text-secondary shadow-sm group">
-          <Calendar size={18} className="text-gray-400 group-hover:text-primary transition-colors" />
-          Date: <span className="text-text-main font-bold ml-1">This Month</span>
-           <ChevronDown size={16} className="text-gray-400" />
-        </button>
+        <div className="relative group">
+            <button className="flex items-center gap-2 px-4 py-2 bg-surface-light border border-border-color rounded-xl text-sm font-medium hover:border-primary transition-colors text-text-secondary shadow-sm">
+            <Calendar size={18} className="text-gray-400 group-hover:text-primary transition-colors" />
+            Sort: <span className="text-text-main font-bold ml-1">{sortOrder === 'newest' ? 'Newest First' : 'Oldest First'}</span>
+            <ChevronDown size={16} className="text-gray-400" />
+            </button>
+            <div className="absolute top-full left-0 mt-2 w-48 bg-white rounded-xl shadow-xl border border-gray-100 py-1 z-10 hidden group-hover:block animate-in fade-in zoom-in-95 duration-200">
+                <button onClick={() => setSortOrder('newest')} className="w-full text-left px-4 py-2 text-sm hover:bg-gray-50 text-gray-700">Newest First</button>
+                <button onClick={() => setSortOrder('oldest')} className="w-full text-left px-4 py-2 text-sm hover:bg-gray-50 text-gray-700">Oldest First</button>
+            </div>
+        </div>
 
         <button className="flex items-center gap-2 px-4 py-2 bg-surface-light border border-border-color rounded-xl text-sm font-medium hover:border-primary transition-colors text-text-secondary shadow-sm group">
           <Tag size={18} className="text-gray-400 group-hover:text-primary transition-colors" />
           Category: <span className="text-text-main font-bold ml-1">All</span>
-           <ChevronDown size={16} className="text-gray-400" />
+          <ChevronDown size={16} className="text-gray-400" />
         </button>
 
         <button className="flex items-center gap-2 px-4 py-2 bg-surface-light border border-border-color rounded-xl text-sm font-medium hover:border-primary transition-colors text-text-secondary shadow-sm ml-auto group">
@@ -113,7 +126,7 @@ export default function Transactions() {
       </div>
 
       <div className="flex-1 overflow-hidden">
-        <TransactionsTable transactions={transactions} getCategoryName={getCategoryName} />
+        <TransactionsTable transactions={sortedTransactions} getCategoryName={getCategoryName} />
       </div>
 
       <TransactionSidebar 
