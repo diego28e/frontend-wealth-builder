@@ -1,58 +1,62 @@
-import { useState } from 'react';
-import { X, Target } from 'lucide-react';
-import { useCurrencies } from '../../hooks/useCurrencies';
+import { useState, useEffect } from 'react';
+import { X, Pencil } from 'lucide-react';
 import { useCategories } from '../../hooks/useCategories';
-import { toCents } from '../../lib/currency';
-import type { CreateFinancialGoalRequest } from '../../types/api';
+import { toCents, fromCents } from '../../lib/currency';
+import type { FinancialGoal, UpdateFinancialGoalRequest } from '../../types/api';
 
-interface NewGoalModalProps {
+interface EditGoalModalProps {
     isOpen: boolean;
     onClose: () => void;
-    onSave: (data: CreateFinancialGoalRequest) => Promise<void>;
-    userId: string;
+    onSave: (id: string, data: UpdateFinancialGoalRequest) => Promise<void>;
+    goal: FinancialGoal | null;
 }
 
-export function NewGoalModal({ isOpen, onClose, onSave, userId }: NewGoalModalProps) {
-    const { currencies } = useCurrencies();
+export function EditGoalModal({ isOpen, onClose, onSave, goal }: EditGoalModalProps) {
     const { categories } = useCategories();
     const [isSubmitting, setIsSubmitting] = useState(false);
+    
+    // Initialize with safe defaults, update when goal changes
     const [formData, setFormData] = useState({
         name: '',
         description: '',
         target_amount: '',
         current_amount: '',
         target_date: '',
-        currency_code: 'COP',
+        status: 'ACTIVE' as 'ACTIVE' | 'COMPLETED' | 'ARCHIVED',
         category_id: ''
     });
 
-    if (!isOpen) return null;
+    useEffect(() => {
+        if (goal) {
+            setFormData({
+                name: goal.name,
+                description: goal.description || '',
+                target_amount: fromCents(goal.target_amount).toString(),
+                current_amount: fromCents(goal.current_amount).toString(),
+                target_date: new Date(goal.target_date).toISOString().split('T')[0],
+                status: goal.status || 'ACTIVE',
+                category_id: goal.category_id || ''
+            });
+        }
+    }, [goal]);
+
+    if (!isOpen || !goal) return null;
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
         setIsSubmitting(true);
         try {
-            await onSave({
-                user_id: userId,
+            await onSave(goal.id, {
+                user_id: goal.user_id,
                 name: formData.name,
                 description: formData.description,
                 target_amount: toCents(formData.target_amount),
-                current_amount: formData.current_amount ? toCents(formData.current_amount) : 0,
+                current_amount: toCents(formData.current_amount),
                 target_date: formData.target_date,
-                currency_code: formData.currency_code,
+                status: formData.status,
                 category_id: formData.category_id || undefined
             });
             onClose();
-            // Reset form
-            setFormData({
-                name: '',
-                description: '',
-                target_amount: '',
-                current_amount: '',
-                target_date: '',
-                currency_code: 'COP',
-                category_id: ''
-            });
         } catch (error) {
             console.error(error);
         } finally {
@@ -68,9 +72,9 @@ export function NewGoalModal({ isOpen, onClose, onSave, userId }: NewGoalModalPr
                 <div className="px-6 py-4 border-b border-gray-100 flex items-center justify-between">
                     <div className="flex items-center gap-2">
                         <div className="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center text-primary">
-                             <Target size={18} />
+                             <Pencil size={18} />
                         </div>
-                        <h3 className="font-bold text-lg text-gray-900">New Financial Goal</h3>
+                        <h3 className="font-bold text-lg text-gray-900">Edit Goal</h3>
                     </div>
                     <button onClick={onClose} className="p-1 text-gray-400 hover:text-gray-600 rounded-lg hover:bg-gray-100 transition-colors">
                         <X size={20} />
@@ -83,7 +87,6 @@ export function NewGoalModal({ isOpen, onClose, onSave, userId }: NewGoalModalPr
                         <input
                             type="text"
                             required
-                            placeholder="e.g. New House, Vacation to Japan"
                             className="w-full px-4 py-2.5 bg-gray-50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none transition-all"
                             value={formData.name}
                             onChange={e => setFormData({ ...formData, name: e.target.value })}
@@ -99,23 +102,22 @@ export function NewGoalModal({ isOpen, onClose, onSave, userId }: NewGoalModalPr
                                     type="number"
                                     required
                                     step="0.01"
-                                    placeholder="0.00"
                                     className="w-full pl-7 pr-4 py-2.5 bg-gray-50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none transition-all"
                                     value={formData.target_amount}
                                     onChange={e => setFormData({ ...formData, target_amount: e.target.value })}
                                 />
                             </div>
                         </div>
-                        <div>
-                            <label className="block text-sm font-semibold text-gray-700 mb-1.5">Currency</label>
+                         <div>
+                            <label className="block text-sm font-semibold text-gray-700 mb-1.5">Status</label>
                             <select
                                 className="w-full px-4 py-2.5 bg-gray-50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none transition-all appearance-none"
-                                value={formData.currency_code}
-                                onChange={e => setFormData({ ...formData, currency_code: e.target.value })}
+                                value={formData.status}
+                                onChange={e => setFormData({ ...formData, status: e.target.value as any })}
                             >
-                                {currencies.map(c => (
-                                    <option key={c.code} value={c.code}>{c.code}</option>
-                                ))}
+                                <option value="ACTIVE">Active</option>
+                                <option value="COMPLETED">Completed</option>
+                                <option value="ARCHIVED">Archived</option>
                             </select>
                         </div>
                     </div>
@@ -128,7 +130,6 @@ export function NewGoalModal({ isOpen, onClose, onSave, userId }: NewGoalModalPr
                                 <input
                                     type="number"
                                     step="0.01"
-                                    placeholder="0.00"
                                     className="w-full pl-7 pr-4 py-2.5 bg-gray-50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none transition-all"
                                     value={formData.current_amount}
                                     onChange={e => setFormData({ ...formData, current_amount: e.target.value })}
@@ -159,14 +160,12 @@ export function NewGoalModal({ isOpen, onClose, onSave, userId }: NewGoalModalPr
                                 <option key={c.id} value={c.id}>{c.name}</option>
                             ))}
                         </select>
-                         <p className="text-xs text-gray-500 mt-1">Link transactions from this category to automatically update goal progress.</p>
                     </div>
 
                     <div>
                         <label className="block text-sm font-semibold text-gray-700 mb-1.5">Description (Optional)</label>
                         <textarea
                             rows={3}
-                            placeholder="Why is this goal important?"
                             className="w-full px-4 py-2.5 bg-gray-50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none transition-all resize-none"
                             value={formData.description}
                             onChange={e => setFormData({ ...formData, description: e.target.value })}
@@ -186,7 +185,7 @@ export function NewGoalModal({ isOpen, onClose, onSave, userId }: NewGoalModalPr
                             disabled={isSubmitting}
                             className="px-6 py-2.5 bg-primary text-white font-bold rounded-xl hover:bg-primary-hover shadow-lg shadow-primary/25 disabled:opacity-70 disabled:cursor-not-allowed transition-all active:scale-95"
                         >
-                            {isSubmitting ? 'Creating...' : 'Create Goal'}
+                            {isSubmitting ? 'Save Changes' : 'Update Goal'}
                         </button>
                     </div>
                 </form>

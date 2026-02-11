@@ -5,10 +5,11 @@ import { goalService } from '../services/goals';
 import { GoalCard } from '../components/goals/GoalCard';
 import { GoalSidebar } from '../components/goals/GoalSidebar';
 import { NewGoalModal } from '../components/goals/NewGoalModal';
-import type { FinancialGoal, CreateFinancialGoalRequest } from '../types/api';
+import { EditGoalModal } from '../components/goals/EditGoalModal';
+import type { FinancialGoal, CreateFinancialGoalRequest, UpdateFinancialGoalRequest } from '../types/api';
 
 // Filters
-type FilterType = 'Active' | 'Completed';
+type FilterType = 'Active' | 'Completed' | 'Archived';
 
 // Mock AI Data
 const MOCK_INSIGHT = "Based on your current savings rate of $450/month across all goals, you are projected to hit your 'New House' down payment target 3 months ahead of schedule. Consider increasing your monthly contribution to 'Vacation' to meet the summer deadline.";
@@ -25,6 +26,7 @@ export default function Goals() {
   const [goals, setGoals] = useState<FinancialGoal[]>([]);
   const [loading, setLoading] = useState(true);
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [editingGoal, setEditingGoal] = useState<FinancialGoal | null>(null);
   const [filter, setFilter] = useState<FilterType>('Active');
   const [aiLoading, setAiLoading] = useState(false);
 
@@ -53,8 +55,28 @@ export default function Goals() {
         await fetchGoals();
     } catch (error) {
         console.error("Failed to create goal", error);
-        throw error; // Let modal handle error state if needed
+        throw error; 
     }
+  };
+
+  const handleUpdateGoal = async (id: string, data: UpdateFinancialGoalRequest) => {
+    try {
+        await goalService.updateGoal(id, data);
+        await fetchGoals();
+        setEditingGoal(null);
+    } catch (error) {
+        console.error("Failed to update goal", error);
+    }
+  };
+
+  const handleDeleteGoal = async (id: string) => {
+      if (!confirm("Are you sure you want to delete this goal? This action cannot be undone.")) return;
+      try {
+          await goalService.deleteGoal(id);
+          await fetchGoals();
+      } catch (error) {
+          console.error("Failed to delete goal", error);
+      }
   };
 
   const handleRefreshAnalysis = () => {
@@ -66,9 +88,9 @@ export default function Goals() {
   };
 
   const filteredGoals = goals.filter(goal => {
-      const isCompleted = goal.current_amount >= goal.target_amount;
-      if (filter === 'Active') return !isCompleted;
-      if (filter === 'Completed') return isCompleted;
+      if (filter === 'Active') return goal.status === 'ACTIVE' || (!goal.status && goal.current_amount < goal.target_amount); // Fallback for old data
+      if (filter === 'Completed') return goal.status === 'COMPLETED' || (!goal.status && goal.current_amount >= goal.target_amount);
+      if (filter === 'Archived') return goal.status === 'ARCHIVED';
       return true;
   });
 
@@ -99,7 +121,7 @@ export default function Goals() {
 
         {/* Filters */}
         <div className="flex gap-2 mb-8">
-            {(['Active', 'Completed'] as FilterType[]).map((f) => (
+            {(['Active', 'Completed', 'Archived'] as FilterType[]).map((f) => (
                 <button
                     key={f}
                     onClick={() => setFilter(f)}
@@ -118,7 +140,12 @@ export default function Goals() {
         {filteredGoals.length > 0 ? (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 gap-6 pb-10">
                 {filteredGoals.map(goal => (
-                    <GoalCard key={goal.id} goal={goal} />
+                    <GoalCard 
+                        key={goal.id} 
+                        goal={goal} 
+                        onEdit={setEditingGoal}
+                        onDelete={handleDeleteGoal}
+                    />
                 ))}
             </div>
         ) : (
@@ -128,7 +155,7 @@ export default function Goals() {
                 </div>
                 <h3 className="text-xl font-bold text-gray-900 mb-2">No {filter.toLowerCase()} goals found</h3>
                 <p className="text-gray-500 max-w-sm mx-auto mb-6">
-                    {filter === 'Active' ? "Start by creating a new financial goal to track your savings journey." : "You haven't completed any goals yet. Keep going!"}
+                    {filter === 'Active' ? "Start by creating a new financial goal to track your savings journey." : `You have no ${filter.toLowerCase()} goals.`}
                 </p>
                 {filter === 'Active' && (
                     <button 
@@ -158,6 +185,15 @@ export default function Goals() {
             onClose={() => setIsModalOpen(false)} 
             onSave={handleCreateGoal}
             userId={user.id} 
+        />
+      )}
+
+      {user && editingGoal && (
+        <EditGoalModal
+            isOpen={!!editingGoal}
+            onClose={() => setEditingGoal(null)}
+            onSave={handleUpdateGoal}
+            goal={editingGoal}
         />
       )}
     </div>

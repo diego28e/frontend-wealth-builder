@@ -186,6 +186,8 @@ export interface FinancialGoal {
     current_amount: number;
     target_date: string;
     currency_code: string;
+    category_id?: string;
+    status: 'ACTIVE' | 'COMPLETED' | 'ARCHIVED';
     is_active: boolean;
     created_at?: string;
     updated_at?: string;
@@ -199,4 +201,16 @@ export interface CreateFinancialGoalRequest {
     current_amount: number;
     target_date: string;
     currency_code: string;
+    category_id?: string;
+}
+
+export interface UpdateFinancialGoalRequest {
+    user_id: string;
+    name?: string;
+    description?: string;
+    target_amount?: number;
+    current_amount?: number;
+    status?: 'ACTIVE' | 'COMPLETED' | 'ARCHIVED';
+    target_date?: string;
+    category_id?: string;
 }
