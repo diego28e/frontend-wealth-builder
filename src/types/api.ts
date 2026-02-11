@@ -176,3 +176,27 @@ export interface CategoryGroupSummary {
     total_amount:number;
     transaction_count: number;
 }
+
+export interface FinancialGoal {
+    id: string;
+    user_id: string;
+    name: string;
+    description: string;
+    target_amount: number;
+    current_amount: number;
+    target_date: string;
+    currency_code: string;
+    is_active: boolean;
+    created_at?: string;
+    updated_at?: string;
+}
+
+export interface CreateFinancialGoalRequest {
+    user_id: string;
+    name: string;
+    description: string;
+    target_amount: number;
+    current_amount: number;
+    target_date: string;
+    currency_code: string;
+}

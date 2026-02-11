@@ -12,7 +12,7 @@ export default function AuthLayout() {
         <div className="relative z-10">
           <div className="flex items-center gap-3 mb-12">
              <div className="bg-primary/20 p-2 rounded-lg backdrop-blur-sm border border-primary/30">
-               <img src="/wealth-builder-logo.png" alt="Wealth Builder" className="w-8 h-8 object-contain brightness-0 invert" />
+               <img src="/wealth-builder-isologo.png" alt="Wealth Builder" className="w-8 h-8 object-contain brightness-0 invert" />
              </div>
              <span className="text-xl font-bold tracking-tight">Wealth Builder</span>
           </div>
@@ -49,7 +49,7 @@ export default function AuthLayout() {
       <div className="w-full lg:w-1/2 flex items-center justify-center p-6 lg:p-12 overflow-y-auto h-full">
         <div className="w-full max-w-md">
             <div className="lg:hidden text-center mb-8">
-                <img src="/wealth-builder-logo.png" alt="Wealth Builder" className="w-12 h-12 mx-auto mb-3" />
+                <img src="/wealth-builder-isologo.png" alt="Wealth Builder" className="w-12 h-12 mx-auto mb-3" />
                 <h2 className="text-2xl font-bold text-gray-900">Wealth Builder</h2>
             </div>
             <Outlet />

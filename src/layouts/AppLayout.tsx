@@ -28,7 +28,7 @@ export default function AppLayout() {
               <Link to="/" className="text-2xl font-bold text-emerald-600">
                 <img
                   className="w-64 mx-auto"
-                  src="wealth-builder-isologo.png"
+                  src="wealth-builder-logo.png"
                   alt="logo"
                 />
               </Link>
