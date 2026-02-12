@@ -1,7 +1,7 @@
-import { TrendingUp, TrendingDown, DollarSign } from 'lucide-react';
+import { DollarSign, Wallet, CreditCard } from 'lucide-react';
 import type { Transaction, UserBalance } from '../../types/api';
-import { fromCents, formatCurrency } from '../../lib/currency';
-import { useMemo } from 'react';
+import { useAuth } from '../../contexts/AuthContext';
+import { fromCents } from '../../lib/currency';
 
 interface StatCardsProps {
   transactions: Transaction[];
@@ -9,81 +9,73 @@ interface StatCardsProps {
 }
 
 export default function StatCards({ transactions, balance }: StatCardsProps) {
-  const stats = useMemo(() => {
-    // Validating that transactions is an array before filtering
-    const safeTransactions = Array.isArray(transactions) ? transactions : [];
-    
-    const totalIncome = safeTransactions
-      .filter((tx) => tx.type === 'Income')
-      .reduce((sum, tx) => sum + tx.amount, 0);
+  const { user } = useAuth();
 
-    const totalExpenses = safeTransactions
-      .filter((tx) => tx.type === 'Expense')
-      .reduce((sum, tx) => sum + Math.abs(tx.amount), 0);
-
-    const currencyCode = balance?.starting_balance_currency_code || 'COP';
-    const currentBalance = balance?.current_calculated_balance ?? 0;
-    const startingBalance = balance?.starting_balance ?? 0;
-
-    return [
-      {
-        label: 'Total Balance',
-        value: `${currencyCode} ${formatCurrency(fromCents(currentBalance))}`,
-        change: `From ${currencyCode} ${formatCurrency(fromCents(startingBalance))}`,
-        trend: 'neutral' as const,
-        icon: DollarSign,
-      },
-      {
-        label: 'Income',
-        value: `${currencyCode} ${formatCurrency(fromCents(totalIncome))}`,
-        change: 'This period',
-        trend: 'up' as const,
-        icon: TrendingUp,
-      },
-      {
-        label: 'Expenses',
-        value: `${currencyCode} ${formatCurrency(fromCents(totalExpenses))}`,
-        change: 'This period',
-        trend: 'down' as const,
-        icon: TrendingDown,
-      },
-    ];
-  }, [transactions, balance]);
+  // Calculate total income and expense from transactions (this month)
+  const totals = transactions.reduce((acc, t) => {
+    const amount = fromCents(t.amount);
+    if (t.type === 'Income') acc.income += amount;
+    else if (t.type === 'Expense') acc.expense += amount;
+    return acc;
+  }, { income: 0, expense: 0 });
 
   return (
     <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-      {stats.map((stat) => {
-        const Icon = stat.icon;
-        return (
-          <div
-            key={stat.label}
-            className="bg-surface-light rounded-xl p-6 border border-border-color shadow-sm hover:shadow-md transition-shadow"
-          >
-            <div className="flex items-center justify-between mb-4">
-              <span className="text-sm font-medium text-text-secondary">
-                {stat.label}
-              </span>
-              <div className="w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center">
-                <Icon size={20} className="text-primary" />
-              </div>
-            </div>
-            <div className="text-3xl font-bold text-text-main mb-2">
-              {stat.value}
-            </div>
-            <div
-              className={`text-sm font-medium ${
-                stat.trend === 'up'
-                  ? 'text-green-600'
-                  : stat.trend === 'down'
-                  ? 'text-red-600'
-                  : 'text-text-secondary'
-              }`}
-            >
-              {stat.change}
-            </div>
+      {/* Net Worth Card */}
+      <div className="bg-white p-6 rounded-2xl shadow-sm border border-gray-100 hover:shadow-md transition-shadow">
+        <div className="flex items-center gap-3 mb-2">
+          <div className="p-2 bg-blue-50 rounded-lg text-blue-600">
+            <Wallet size={20} />
           </div>
-        );
-      })}
+          <span className="text-sm font-bold text-gray-500 uppercase tracking-wider">Net Worth</span>
+        </div>
+        <p className="text-3xl font-extrabold text-gray-900 tracking-tight">
+          {fromCents(balance?.net_worth ?? 0).toLocaleString('en-US', {
+            style: 'currency',
+            currency: balance?.currency_code || user?.default_currency || 'COP',
+          })}
+        </p>
+        <p className="text-xs text-gray-400 mt-2 font-medium">Total assets across all accounts</p>
+      </div>
+
+      {/* Liquid Balance Card */}
+      <div className="bg-white p-6 rounded-2xl shadow-sm border border-gray-100 hover:shadow-md transition-shadow">
+        <div className="flex items-center gap-3 mb-2">
+          <div className="p-2 bg-green-50 rounded-lg text-green-600">
+            <DollarSign size={20} />
+          </div>
+          <span className="text-sm font-bold text-gray-500 uppercase tracking-wider">Liquid Balance</span>
+        </div>
+        <p className="text-3xl font-extrabold text-gray-900 tracking-tight">
+          {fromCents(balance?.liquid_balance ?? 0).toLocaleString('en-US', {
+            style: 'currency',
+            currency: balance?.currency_code || user?.default_currency || 'COP',
+          })}
+        </p>
+        <p className="text-xs text-gray-400 mt-2 font-medium">Available for immediate spending</p>
+      </div>
+
+      {/* Monthly Spending Card */}
+      <div className="bg-white p-6 rounded-2xl shadow-sm border border-gray-100 hover:shadow-md transition-shadow">
+        <div className="flex items-center gap-3 mb-2">
+          <div className="p-2 bg-purple-50 rounded-lg text-purple-600">
+            <CreditCard size={20} />
+          </div>
+          <span className="text-sm font-bold text-gray-500 uppercase tracking-wider">Monthly Spend</span>
+        </div>
+        <p className="text-3xl font-extrabold text-gray-900 tracking-tight">
+          {totals.expense.toLocaleString('en-US', {
+            style: 'currency',
+            currency: balance?.currency_code || user?.default_currency || 'COP',
+          })}
+        </p>
+        <div className="flex items-center gap-1 mt-2">
+          <div className={`flex items-center text-xs font-bold px-1.5 py-0.5 rounded ${totals.income > totals.expense ? 'bg-green-50 text-green-700' : 'bg-red-50 text-red-700'}`}>
+            {totals.income > 0 ? ((totals.expense / totals.income) * 100).toFixed(0) : 0}% of income
+          </div>
+          <span className="text-xs text-gray-400 font-medium">used</span>
+        </div>
+      </div>
     </div>
   );
 }

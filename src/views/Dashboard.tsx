@@ -2,7 +2,7 @@ import { Calendar, Plus, ChevronLeft, ChevronRight } from 'lucide-react';
 import { useState, useMemo } from 'react';
 import StatCards from '../components/dashboard/StatCards';
 import TransactionsTable from '../components/dashboard/TransactionsTable';
-import {BudgetBreakdown} from '../components/dashboard/BudgetBreakdown';
+import { BudgetBreakdown } from '../components/dashboard/BudgetBreakdown';
 import InsightsCard from '../components/dashboard/InsightsCard';
 import type { Transaction } from '../types/api';
 import { useCategoryGroupSummary } from '../hooks/useCategoryGroupSummary';
@@ -10,7 +10,7 @@ import { useTransactions } from '../hooks/useTransactions';
 import { useCategories } from '../hooks/useCategories';
 import { useBalance } from '../hooks/useBalance';
 import { useAuth } from '../contexts/AuthContext';
-import {useNavigate} from '@tanstack/react-router';
+import { useNavigate } from '@tanstack/react-router';
 import { TransactionDetailsModal } from '../components/transactions/TransactionDetailsModal';
 
 
@@ -21,18 +21,18 @@ export default function Dashboard() {
   const [selectedTransaction, setSelectedTransaction] = useState<Transaction | null>(null);
 
   const { startDate, endDate } = useMemo(() => {
-  const start = new Date(selectedDate.getFullYear(), selectedDate.getMonth(), 1);
-  const end = new Date(selectedDate.getFullYear(), selectedDate.getMonth() + 1, 0);
-  return {
-    startDate: start.toISOString().split('T')[0],
-    endDate: end.toISOString().split('T')[0],
-  };
-}, [selectedDate]);
+    const start = new Date(selectedDate.getFullYear(), selectedDate.getMonth(), 1);
+    const end = new Date(selectedDate.getFullYear(), selectedDate.getMonth() + 1, 0);
+    return {
+      startDate: start.toISOString().split('T')[0],
+      endDate: end.toISOString().split('T')[0],
+    };
+  }, [selectedDate]);
 
-const { transactions, isLoading: transactionsLoading } = useTransactions(user?.id, startDate, endDate);
-const { balance, isLoading: balanceLoading } = useBalance();
-const { summary, isLoading: summaryLoading } = useCategoryGroupSummary(user?.id, startDate, endDate);
-const { getCategoryName } = useCategories();
+  const { transactions, isLoading: transactionsLoading } = useTransactions(user?.id, startDate, endDate);
+  const { balance, isLoading: balanceLoading } = useBalance();
+  const { summary, isLoading: summaryLoading } = useCategoryGroupSummary(user?.id, startDate, endDate);
+  const { getCategoryName } = useCategories();
 
   const handlePreviousMonth = () => {
     setSelectedDate(new Date(selectedDate.getFullYear(), selectedDate.getMonth() - 1));
@@ -55,7 +55,6 @@ const { getCategoryName } = useCategories();
   return (
     <div className="space-y-8">
       {/* Header Section */}
-      {/* Header Section */}
       <div className="flex flex-col md:flex-row md:items-end justify-between gap-6">
         <div>
           <h2 className="text-3xl font-extrabold tracking-tight text-gray-900">Dashboard</h2>
@@ -63,32 +62,32 @@ const { getCategoryName } = useCategories();
             Overview of your financial health
           </p>
         </div>
-        
+
         <div className="flex items-center gap-4">
           {/* Calendar Navigation Pill */}
           <div className="flex items-center bg-white border border-gray-200 rounded-full p-1 shadow-sm">
-            <button 
-                onClick={handlePreviousMonth} 
-                className="p-2 rounded-full hover:bg-gray-100 text-gray-500 hover:text-gray-900 transition-colors"
-                title="Previous Month"
+            <button
+              onClick={handlePreviousMonth}
+              className="p-2 rounded-full hover:bg-gray-100 text-gray-500 hover:text-gray-900 transition-colors"
+              title="Previous Month"
             >
               <ChevronLeft size={18} />
             </button>
             <span className="px-4 py-1 text-sm font-bold text-gray-800 min-w-[100px] text-center select-none flex items-center justify-center gap-2">
-                <Calendar size={14} className="text-primary/70" />
-                {selectedDate.toLocaleDateString('en-US', { month: 'short', year: 'numeric' })}
+              <Calendar size={14} className="text-primary/70" />
+              {selectedDate.toLocaleDateString('en-US', { month: 'short', year: 'numeric' })}
             </span>
-            <button 
-                onClick={handleNextMonth} 
-                className="p-2 rounded-full hover:bg-gray-100 text-gray-500 hover:text-gray-900 transition-colors"
-                title="Next Month"
+            <button
+              onClick={handleNextMonth}
+              className="p-2 rounded-full hover:bg-gray-100 text-gray-500 hover:text-gray-900 transition-colors"
+              title="Next Month"
             >
               <ChevronRight size={18} />
             </button>
           </div>
 
-          <button 
-            onClick={() => navigate({to:'/transactions'})} 
+          <button
+            onClick={() => navigate({ to: '/transactions' })}
             className="flex items-center gap-2 px-5 py-2.5 bg-primary text-white rounded-full text-sm font-bold shadow-lg shadow-primary/20 hover:bg-primary-hover hover:shadow-primary/30 transition-all transform active:scale-95"
           >
             <Plus size={18} strokeWidth={2.5} />
@@ -109,9 +108,9 @@ const { getCategoryName } = useCategories();
         </div>
       </div>
 
-      <TransactionsTable 
-        transactions={transactions.slice(0, 5)} 
-        getCategoryName={getCategoryName} 
+      <TransactionsTable
+        transactions={transactions.slice(0, 5)}
+        getCategoryName={getCategoryName}
         onTransactionClick={setSelectedTransaction}
       />
 

@@ -1,5 +1,5 @@
 export type UserProfileType = 'Low-Income' | 'High-Income/High-Expense' | 'Wealth-Builder';
-export type TransactionType = 'Income' | 'Expense';
+export type TransactionType = 'Income' | 'Expense' | 'Transfer';
 export type CategoryGroupName = 'Income' | 'Needs' | 'Wants' | 'Savings';
 export type AccountType = 'Checking' | 'Savings' | 'Credit Card' | 'Cash' | 'Investment' | 'Other';
 export type ConfigurationType = 'PERCENTAGE' | 'FIXED';
@@ -23,20 +23,20 @@ export interface User extends UserBase {
 
 //Auth request/responsse types
 export interface LoginRequest {
-    email:string;
-    password:string;
+    email: string;
+    password: string;
 }
 
-export interface RegisterRequest extends Pick<UserBase, 'email'|'first_name' | 'last_name' | 'profile'> {
-    password:string;
+export interface RegisterRequest extends Pick<UserBase, 'email' | 'first_name' | 'last_name' | 'profile'> {
+    password: string;
 }
 
 export interface AuthResponse {
-    user:User;
+    user: User;
 }
 
-export interface ErrorResponse{
-    error:string;
+export interface ErrorResponse {
+    error: string;
 }
 
 //Transaction types
@@ -81,6 +81,7 @@ export interface Account {
     current_balance: number;
     interest_rate?: number;
     is_tax_exempt?: boolean;
+    is_liquid?: boolean;
     is_active: boolean;
     configurations?: AccountConfiguration[];
     created_at: string;
@@ -95,6 +96,7 @@ export interface CreateAccountRequest {
     current_balance: number;
     interest_rate?: number;
     is_tax_exempt?: boolean;
+    is_liquid?: boolean;
     configurations?: AccountConfiguration[];
 }
 
@@ -105,6 +107,7 @@ export interface UpdateAccountRequest {
     current_balance?: number;
     interest_rate?: number;
     is_tax_exempt?: boolean;
+    is_liquid?: boolean;
     is_active?: boolean;
     configurations?: AccountConfiguration[];
 }
@@ -115,6 +118,7 @@ export interface Transaction {
     account_id: string;
     category_id: string;
     goal_id: string | null;
+    transfer_destination_account_id?: string | null;
     date: string;
     amount: number;
     type: TransactionType;
@@ -133,6 +137,7 @@ export interface CreateTransactionRequest {
     account_id: string;
     category_id: string;
     goal_id?: string;
+    transfer_destination_account_id?: string;
     date: string;
     amount: number;
     type: TransactionType;
@@ -172,10 +177,9 @@ export interface Currency {
 }
 
 export interface UserBalance {
-    starting_balance: number;
-    starting_balance_date: string;
-    starting_balance_currency_code: string;
-    current_calculated_balance: number;
+    net_worth: number;
+    liquid_balance: number;
+    currency_code: string;
 }
 
 
@@ -187,7 +191,7 @@ export interface UpdateStartingBalanceRequest {
 export interface CategoryGroupSummary {
     category_group_id: string;
     category_group_name: CategoryGroupName;
-    total_amount:number;
+    total_amount: number;
     transaction_count: number;
 }
 

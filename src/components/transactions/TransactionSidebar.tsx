@@ -1,8 +1,8 @@
 import { useState, useRef } from 'react';
-import { X, Upload, DollarSign, Calendar, Store, FileText, ScanLine, Receipt, CreditCard } from 'lucide-react';
+import { X, Upload, DollarSign, Calendar, Store, FileText, ScanLine, Receipt, CreditCard, ArrowRightLeft } from 'lucide-react';
 import { useAuth } from '../../contexts/AuthContext';
-import { useCategories } from '../../hooks/useCategories';
 import { useAccounts } from '../../hooks/useAccounts';
+import { CategorySelect } from '../common/CategorySelect';
 import { transactionService } from '../../services/transactions';
 import { receiptService } from '../../services/receipts';
 import { toCents } from '../../lib/currency';
@@ -18,10 +18,9 @@ type Tab = 'manual' | 'scan';
 
 export function TransactionSidebar({ isOpen, onClose, onSuccess }: TransactionSidebarProps) {
   const { user } = useAuth();
-  const { categories } = useCategories();
   const { accounts } = useAccounts(user?.id);
   const [activeTab, setActiveTab] = useState<Tab>('manual');
-  
+
   // Form State
   const [formData, setFormData] = useState({
     amount: '',
@@ -30,7 +29,8 @@ export function TransactionSidebar({ isOpen, onClose, onSuccess }: TransactionSi
     description: '',
     category_id: '',
     account_id: '',
-    type: 'Expense' as 'Income' | 'Expense',
+    transfer_destination_account_id: '', // New field
+    type: 'Expense' as 'Income' | 'Expense' | 'Transfer',
   });
 
   // Scan State
@@ -44,13 +44,17 @@ export function TransactionSidebar({ isOpen, onClose, onSuccess }: TransactionSi
     e.preventDefault();
     if (!user || !formData.account_id) return;
 
+    // Validate Transfer
+    if (formData.type === 'Transfer' && !formData.transfer_destination_account_id) {
+      alert("Please select a destination account for the transfer.");
+      return;
+    }
+
     try {
       setIsSubmitting(true);
       const selectedAccount = accounts.find(acc => acc.id === formData.account_id);
       if (!selectedAccount) return;
 
-      // Create a date object from the input string (YYYY-MM-DD)
-      // We append the current time to preserve the timezone and avoid UTC midnight shifts
       const dateObj = new Date(formData.date);
       const now = new Date();
       dateObj.setHours(now.getHours(), now.getMinutes(), now.getSeconds());
@@ -65,6 +69,7 @@ export function TransactionSidebar({ isOpen, onClose, onSuccess }: TransactionSi
         description: formData.description,
         currency_code: selectedAccount.currency_code,
         merchant_name: formData.merchant_name || undefined,
+        transfer_destination_account_id: formData.type === 'Transfer' ? formData.transfer_destination_account_id : undefined,
       };
 
       await transactionService.createTransaction(transactionData);
@@ -85,7 +90,7 @@ export function TransactionSidebar({ isOpen, onClose, onSuccess }: TransactionSi
     try {
       setIsScanning(true);
       const receiptData = await receiptService.uploadReceipt(receiptFile, user.id, scanAccountId);
-      
+
       // Auto-populate manual form with scanned data for review
       setFormData(prev => ({
         ...prev,
@@ -94,7 +99,7 @@ export function TransactionSidebar({ isOpen, onClose, onSuccess }: TransactionSi
         merchant_name: receiptData.extracted_data?.merchant || '',
         date: receiptData.extracted_data?.date ? new Date(receiptData.extracted_data.date).toISOString().split('T')[0] : prev.date,
         description: 'Receipt Scan Import',
-        type: 'Expense' // Receipts are usually expenses
+        type: 'Expense'
       }));
 
       // Switch to manual tab for review
@@ -115,6 +120,7 @@ export function TransactionSidebar({ isOpen, onClose, onSuccess }: TransactionSi
       description: '',
       category_id: '',
       account_id: '',
+      transfer_destination_account_id: '',
       type: 'Expense',
     });
     setReceiptFile(null);
@@ -124,19 +130,25 @@ export function TransactionSidebar({ isOpen, onClose, onSuccess }: TransactionSi
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
     const { name, value } = e.target;
-    setFormData(prev => ({ ...prev, [name]: value }));
+    setFormData(prev => ({ ...prev, [name]: value as any }));
   };
 
-  const focusClass = formData.type === 'Income' 
-    ? 'focus:ring-green-500/20 focus:border-green-500' 
-    : 'focus:ring-red-500/20 focus:border-red-500';
+  const focusClass = formData.type === 'Income'
+    ? 'focus:ring-green-500/20 focus:border-green-500'
+    : formData.type === 'Transfer'
+      ? 'focus:ring-blue-500/20 focus:border-blue-500'
+      : 'focus:ring-red-500/20 focus:border-red-500';
 
-  const iconClass = formData.type === 'Income' ? 'text-green-500' : 'text-red-500';
+  const iconClass = formData.type === 'Income'
+    ? 'text-green-500'
+    : formData.type === 'Transfer'
+      ? 'text-blue-500'
+      : 'text-red-500';
 
   return (
     <>
       {/* Backdrop */}
-      <div 
+      <div
         className={`fixed inset-0 bg-black/50 z-40 transition-opacity duration-300 ${isOpen ? 'opacity-100' : 'opacity-0 pointer-events-none'}`}
         onClick={onClose}
       />
@@ -156,22 +168,20 @@ export function TransactionSidebar({ isOpen, onClose, onSuccess }: TransactionSi
           <div className="flex border-b border-gray-100">
             <button
               onClick={() => setActiveTab('manual')}
-              className={`flex-1 py-4 text-sm font-semibold flex items-center justify-center gap-2 transition-colors ${
-                activeTab === 'manual' 
-                  ? 'text-primary border-b-2 border-primary' 
-                  : 'text-gray-500 hover:text-gray-700'
-              }`}
+              className={`flex-1 py-4 text-sm font-semibold flex items-center justify-center gap-2 transition-colors ${activeTab === 'manual'
+                ? 'text-primary border-b-2 border-primary'
+                : 'text-gray-500 hover:text-gray-700'
+                }`}
             >
               <FileText size={18} />
               Manual Entry
             </button>
             <button
               onClick={() => setActiveTab('scan')}
-              className={`flex-1 py-4 text-sm font-semibold flex items-center justify-center gap-2 transition-colors ${
-                activeTab === 'scan' 
-                  ? 'text-primary border-b-2 border-primary' 
-                  : 'text-gray-500 hover:text-gray-700'
-              }`}
+              className={`flex-1 py-4 text-sm font-semibold flex items-center justify-center gap-2 transition-colors ${activeTab === 'scan'
+                ? 'text-primary border-b-2 border-primary'
+                : 'text-gray-500 hover:text-gray-700'
+                }`}
             >
               <ScanLine size={18} />
               Scan Receipt
@@ -181,41 +191,50 @@ export function TransactionSidebar({ isOpen, onClose, onSuccess }: TransactionSi
           {/* Content */}
           <div className="flex-1 overflow-y-auto p-6">
             {activeTab === 'manual' ? (
-              <form 
-                onSubmit={handleManualSubmit} 
-                className={`flex flex-col gap-5 p-6 rounded-2xl border transition-all duration-300 bg-white ${
-                  formData.type === 'Income' 
-                    ? 'border-green-200 shadow-[0_4px_20px_-4px_rgba(34,197,94,0.1)]' 
+              <form
+                onSubmit={handleManualSubmit}
+                className={`flex flex-col gap-5 p-6 rounded-2xl border transition-all duration-300 bg-white ${formData.type === 'Income'
+                  ? 'border-green-200 shadow-[0_4px_20px_-4px_rgba(34,197,94,0.1)]'
+                  : formData.type === 'Transfer'
+                    ? 'border-blue-200 shadow-[0_4px_20px_-4px_rgba(59,130,246,0.1)]'
                     : 'border-red-200 shadow-[0_4px_20px_-4px_rgba(239,68,68,0.1)]'
-                }`}
+                  }`}
               >
                 {/* Type Selection */}
                 <div>
                   <label className="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-2">
                     Transaction Type
                   </label>
-                  <div className="grid grid-cols-2 gap-2">
+                  <div className="grid grid-cols-3 gap-2">
                     <button
                       type="button"
                       onClick={() => setFormData(prev => ({ ...prev, type: 'Income' }))}
-                      className={`h-10 rounded-lg border flex items-center justify-center text-sm font-medium transition-all ${
-                        formData.type === 'Income'
-                          ? 'bg-green-100 text-green-700 border-green-500 shadow-sm'
-                          : 'border-border-color bg-white text-gray-500 hover:bg-gray-50'
-                      }`}
+                      className={`h-10 rounded-lg border flex items-center justify-center text-sm font-medium transition-all ${formData.type === 'Income'
+                        ? 'bg-green-100 text-green-700 border-green-500 shadow-sm'
+                        : 'border-border-color bg-white text-gray-500 hover:bg-gray-50'
+                        }`}
                     >
                       Income
                     </button>
                     <button
                       type="button"
                       onClick={() => setFormData(prev => ({ ...prev, type: 'Expense' }))}
-                      className={`h-10 rounded-lg border flex items-center justify-center text-sm font-medium transition-all ${
-                        formData.type === 'Expense'
-                          ? 'bg-red-100 text-red-700 border-red-500 shadow-sm'
-                          : 'border-border-color bg-white text-gray-500 hover:bg-gray-50'
-                      }`}
+                      className={`h-10 rounded-lg border flex items-center justify-center text-sm font-medium transition-all ${formData.type === 'Expense'
+                        ? 'bg-red-100 text-red-700 border-red-500 shadow-sm'
+                        : 'border-border-color bg-white text-gray-500 hover:bg-gray-50'
+                        }`}
                     >
                       Expense
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => setFormData(prev => ({ ...prev, type: 'Transfer' }))}
+                      className={`h-10 rounded-lg border flex items-center justify-center text-sm font-medium transition-all ${formData.type === 'Transfer'
+                        ? 'bg-blue-100 text-blue-700 border-blue-500 shadow-sm'
+                        : 'border-border-color bg-white text-gray-500 hover:bg-gray-50'
+                        }`}
+                    >
+                      Transfer
                     </button>
                   </div>
                 </div>
@@ -236,9 +255,7 @@ export function TransactionSidebar({ isOpen, onClose, onSuccess }: TransactionSi
                       className={`w-full pl-11 pr-4 py-3 bg-white border border-gray-200 rounded-xl text-lg font-bold text-gray-900 focus:ring-2 transition-all outline-none ${focusClass}`}
                       onWheel={(e) => e.currentTarget.blur()}
                       onKeyDown={(e) => {
-                        if (e.key === 'ArrowUp' || e.key === 'ArrowDown') {
-                          e.preventDefault();
-                        }
+                        if (e.key === 'ArrowUp' || e.key === 'ArrowDown') e.preventDefault();
                       }}
                     />
                   </div>
@@ -247,9 +264,11 @@ export function TransactionSidebar({ isOpen, onClose, onSuccess }: TransactionSi
                 {/* Account & Date Row */}
                 <div className="grid grid-cols-2 gap-4">
                   <div>
-                    <label className="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-2">Account</label>
+                    <label className="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-2">
+                      {formData.type === 'Transfer' ? 'From Account' : 'Account'}
+                    </label>
                     <div className="relative">
-                       <CreditCard className={`absolute left-3 top-1/2 -translate-y-1/2 transition-colors ${iconClass}`} size={16} />
+                      <CreditCard className={`absolute left-3 top-1/2 -translate-y-1/2 transition-colors ${iconClass}`} size={16} />
                       <select
                         name="account_id"
                         required
@@ -280,46 +299,67 @@ export function TransactionSidebar({ isOpen, onClose, onSuccess }: TransactionSi
                   </div>
                 </div>
 
+                {/* Destination Account (Only for Transfer) */}
+                {formData.type === 'Transfer' && (
+                  <div>
+                    <label className="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-2">To Account</label>
+                    <div className="relative">
+                      <ArrowRightLeft className={`absolute left-3 top-1/2 -translate-y-1/2 transition-colors ${iconClass}`} size={16} />
+                      <select
+                        name="transfer_destination_account_id"
+                        required
+                        value={formData.transfer_destination_account_id}
+                        onChange={handleInputChange}
+                        className={`w-full pl-9 pr-8 py-2.5 bg-white border border-gray-200 rounded-lg text-sm font-medium text-gray-900 focus:ring-2 transition-all outline-none appearance-none ${focusClass}`}
+                      >
+                        <option value="">Select Destination</option>
+                        {accounts
+                          .filter(acc => acc.id !== formData.account_id) // Exclude source account
+                          .map(acc => (
+                            <option key={acc.id} value={acc.id}>{acc.name}</option>
+                          ))
+                        }
+                      </select>
+                    </div>
+                  </div>
+                )}
+
                 {/* Category */}
                 <div>
                   <label className="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-2">Category</label>
-                  <select
-                    name="category_id"
-                    required
+                  <CategorySelect
                     value={formData.category_id}
-                    onChange={handleInputChange}
-                    className={`w-full px-4 py-3 bg-white border border-gray-200 rounded-xl text-sm font-medium text-gray-900 focus:ring-2 transition-all outline-none ${focusClass}`}
-                  >
-                    <option value="">Select Category</option>
-                    {categories.map(cat => (
-                      <option key={cat.id} value={cat.id}>{cat.name}</option>
-                    ))}
-                  </select>
+                    onChange={(e) => setFormData(prev => ({ ...prev, category_id: e.target.value }))}
+                    className={`bg-white border text-gray-900 border-gray-200 ${focusClass}`}
+                    required
+                  />
                 </div>
 
                 {/* Merchant & Description */}
                 <div className="space-y-4">
-                  <div>
-                    <label className="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-2">Merchant</label>
-                    <div className="relative">
-                      <Store className={`absolute left-3 top-1/2 -translate-y-1/2 transition-colors ${iconClass}`} size={18} />
-                      <input
-                        name="merchant_name"
-                        type="text"
-                        value={formData.merchant_name}
-                        onChange={handleInputChange}
-                        placeholder="e.g. Starbucks"
-                        className="w-full pl-10 pr-4 py-2.5 bg-white border border-gray-200 rounded-lg text-sm font-medium text-gray-900 focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all outline-none"
-                      />
+                  {formData.type !== 'Transfer' && (
+                    <div>
+                      <label className="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-2">Merchant</label>
+                      <div className="relative">
+                        <Store className={`absolute left-3 top-1/2 -translate-y-1/2 transition-colors ${iconClass}`} size={18} />
+                        <input
+                          name="merchant_name"
+                          type="text"
+                          value={formData.merchant_name}
+                          onChange={handleInputChange}
+                          placeholder="e.g. Starbucks"
+                          className="w-full pl-10 pr-4 py-2.5 bg-white border border-gray-200 rounded-lg text-sm font-medium text-gray-900 focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all outline-none"
+                        />
+                      </div>
                     </div>
-                  </div>
+                  )}
                   <div>
                     <label className="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-2">Description</label>
                     <textarea
                       name="description"
                       value={formData.description}
                       onChange={handleInputChange}
-                      placeholder="What was this for?"
+                      placeholder={formData.type === 'Transfer' ? "Transfer details..." : "What was this for?"}
                       rows={3}
                       className={`w-full px-4 py-3 bg-white border border-gray-200 rounded-xl text-sm font-medium text-gray-900 focus:ring-2 transition-all outline-none resize-none ${focusClass}`}
                     />
@@ -353,13 +393,12 @@ export function TransactionSidebar({ isOpen, onClose, onSuccess }: TransactionSi
                 </div>
 
                 {/* File Upload Area */}
-                <div 
+                <div
                   onClick={() => fileInputRef.current?.click()}
-                  className={`border-2 border-dashed rounded-xl p-8 text-center cursor-pointer transition-all ${
-                    receiptFile 
-                      ? 'border-primary bg-primary/5' 
-                      : 'border-gray-200 hover:border-primary hover:bg-gray-50'
-                  }`}
+                  className={`border-2 border-dashed rounded-xl p-8 text-center cursor-pointer transition-all ${receiptFile
+                    ? 'border-primary bg-primary/5'
+                    : 'border-gray-200 hover:border-primary hover:bg-gray-50'
+                    }`}
                 >
                   <input
                     type="file"
@@ -392,11 +431,12 @@ export function TransactionSidebar({ isOpen, onClose, onSuccess }: TransactionSi
               <button
                 onClick={handleManualSubmit}
                 disabled={isSubmitting}
-                className={`w-full py-3.5 text-white font-bold rounded-xl shadow-lg hover:shadow-xl active:scale-95 transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2 ${
-                  formData.type === 'Income'
-                   ? 'bg-green-600 hover:bg-green-700 shadow-green-200'
-                   : 'bg-red-600 hover:bg-red-700 shadow-red-200'
-                }`}
+                className={`w-full py-3.5 text-white font-bold rounded-xl shadow-lg hover:shadow-xl active:scale-95 transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2 ${formData.type === 'Income'
+                  ? 'bg-green-600 hover:bg-green-700 shadow-green-200'
+                  : formData.type === 'Transfer'
+                    ? 'bg-blue-600 hover:bg-blue-700 shadow-blue-200'
+                    : 'bg-red-600 hover:bg-red-700 shadow-red-200'
+                  }`}
               >
                 {isSubmitting ? (
                   <>
