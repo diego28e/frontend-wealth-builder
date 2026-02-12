@@ -42,10 +42,15 @@ export function TransactionForm({ onSuccess, onCancel }: TransactionFormProps) {
       if (!selectedAccount) return;
 
       
-      // Create a date object from the input string (YYYY-MM-DD)
-      // We append the current time to preserve the timezone and avoid UTC midnight shifts
-      const dateObj = new Date(formData.date);
+      // Create a date object from the input string (YYYY-MM-DD) treating it as local time
+      // This avoids the UTC midnight shift issue requiring manual parsing
+      const [year, month, day] = formData.date.split('-').map(Number);
+      const dateObj = new Date(year, month - 1, day);
+      
       const now = new Date();
+      // If the selected date is today, use the current time
+      // If it's a past/future date, we still use the current time to mock "set now" behavior for ordering
+      // but ensure we stay on the selected day
       dateObj.setHours(now.getHours(), now.getMinutes(), now.getSeconds());
       
       let transactionData: CreateTransactionRequest = {

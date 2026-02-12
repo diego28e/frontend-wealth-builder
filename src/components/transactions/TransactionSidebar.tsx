@@ -55,7 +55,8 @@ export function TransactionSidebar({ isOpen, onClose, onSuccess }: TransactionSi
       const selectedAccount = accounts.find(acc => acc.id === formData.account_id);
       if (!selectedAccount) return;
 
-      const dateObj = new Date(formData.date);
+      const [year, month, day] = formData.date.split('-').map(Number);
+      const dateObj = new Date(year, month - 1, day);
       const now = new Date();
       dateObj.setHours(now.getHours(), now.getMinutes(), now.getSeconds());
 
