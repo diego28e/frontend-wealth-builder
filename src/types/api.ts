@@ -125,6 +125,7 @@ export interface Transaction {
     has_line_items: boolean;
     created_at: string;
     updated_at: string;
+    transaction_items?: TransactionItem[];
 }
 
 export interface CreateTransactionRequest {
@@ -139,6 +140,19 @@ export interface CreateTransactionRequest {
     notes?: string;
     currency_code: string;
     merchant_name?: string;
+    transaction_items?: TransactionItem[];
+}
+
+export interface TransactionItem {
+    id: string;
+    transaction_id: string;
+    item_name: string;
+    quantity: number;
+    unit_price: number;
+    total_amount: number;
+    category_id: string;
+    sort_order: number;
+    created_at: string;
 }
 
 export interface ReceiptUploadResponse {

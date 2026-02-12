@@ -5,9 +5,10 @@ import type { Transaction } from '../../types/api';
 interface TransactionsTableProps {
   transactions: Transaction[];
   getCategoryName: (categoryId: string) => string;
+  onTransactionClick?: (transaction: Transaction) => void;
 }
 
-export default function TransactionsTable({ transactions, getCategoryName }: TransactionsTableProps) {
+export default function TransactionsTable({ transactions, getCategoryName, onTransactionClick }: TransactionsTableProps) {
   // Ensure we always have an array
   const safeTransactions = Array.isArray(transactions) ? transactions : [];
 
@@ -52,7 +53,11 @@ export default function TransactionsTable({ transactions, getCategoryName }: Tra
           </thead>
           <tbody className="divide-y divide-border-color">
             {safeTransactions.map((tx) => (
-              <tr key={tx.id} className="hover:bg-gray-50 transition-colors">
+              <tr 
+                key={tx.id} 
+                onClick={() => onTransactionClick?.(tx)}
+                className="hover:bg-gray-50 transition-colors cursor-pointer active:bg-gray-100"
+              >
                 <td className="px-6 py-4">
                   <div className="flex items-center gap-3">
                     <div

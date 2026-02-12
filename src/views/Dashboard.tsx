@@ -3,18 +3,22 @@ import { useState, useMemo } from 'react';
 import StatCards from '../components/dashboard/StatCards';
 import TransactionsTable from '../components/dashboard/TransactionsTable';
 import {BudgetBreakdown} from '../components/dashboard/BudgetBreakdown';
-import { useCategoryGroupSummary } from '../hooks/useCategoryGroupSummary';
 import InsightsCard from '../components/dashboard/InsightsCard';
+import type { Transaction } from '../types/api';
+import { useCategoryGroupSummary } from '../hooks/useCategoryGroupSummary';
 import { useTransactions } from '../hooks/useTransactions';
 import { useCategories } from '../hooks/useCategories';
 import { useBalance } from '../hooks/useBalance';
 import { useAuth } from '../contexts/AuthContext';
 import {useNavigate} from '@tanstack/react-router';
+import { TransactionDetailsModal } from '../components/transactions/TransactionDetailsModal';
+
 
 export default function Dashboard() {
   const { user } = useAuth();
   const [selectedDate, setSelectedDate] = useState(new Date());
   const navigate = useNavigate();
+  const [selectedTransaction, setSelectedTransaction] = useState<Transaction | null>(null);
 
   const { startDate, endDate } = useMemo(() => {
   const start = new Date(selectedDate.getFullYear(), selectedDate.getMonth(), 1);
@@ -105,10 +109,18 @@ const { getCategoryName } = useCategories();
         </div>
       </div>
 
+      <TransactionsTable 
+        transactions={transactions.slice(0, 5)} 
+        getCategoryName={getCategoryName} 
+        onTransactionClick={setSelectedTransaction}
+      />
 
-      <TransactionsTable transactions={transactions} getCategoryName={getCategoryName} />
-
-      {/* Footer */}
+      <TransactionDetailsModal
+        transaction={selectedTransaction}
+        isOpen={!!selectedTransaction}
+        onClose={() => setSelectedTransaction(null)}
+        getCategoryName={getCategoryName}
+      />
       <footer className="mt-8 text-center text-xs text-gray-400 font-medium">
         <p>© {new Date().getFullYear()} Wealth Builder. All rights reserved.</p>
       </footer>

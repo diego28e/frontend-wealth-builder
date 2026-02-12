@@ -6,6 +6,9 @@ import { useCategories } from '../hooks/useCategories';
 import { useAuth } from '../contexts/AuthContext';
 import { TransactionSidebar } from '../components/transactions/TransactionSidebar';
 
+import { TransactionDetailsModal } from '../components/transactions/TransactionDetailsModal';
+import type { Transaction } from '../types/api';
+
 export default function Transactions() {
   const { user } = useAuth();
   
@@ -28,6 +31,7 @@ export default function Transactions() {
   const [sortOrder, setSortOrder] = useState<'newest' | 'oldest'>('newest');
   const [selectedCurrency, setSelectedCurrency] = useState<string>('ALL');
   const [isCurrencyOpen, setIsCurrencyOpen] = useState(false);
+  const [selectedTransaction, setSelectedTransaction] = useState<Transaction | null>(null);
 
   // Extract unique currencies from transactions
   const safeTransactions = Array.isArray(transactions) ? transactions : [];
@@ -207,13 +211,24 @@ export default function Transactions() {
       </div>
 
       <div className="flex-1 overflow-hidden">
-        <TransactionsTable transactions={sortedTransactions} getCategoryName={getCategoryName} />
+        <TransactionsTable 
+          transactions={sortedTransactions} 
+          getCategoryName={getCategoryName} 
+          onTransactionClick={setSelectedTransaction}
+        />
       </div>
 
       <TransactionSidebar 
         isOpen={isSidebarOpen} 
         onClose={() => setIsSidebarOpen(false)} 
         onSuccess={handleSuccess}
+      />
+      
+      <TransactionDetailsModal
+        transaction={selectedTransaction}
+        isOpen={!!selectedTransaction}
+        onClose={() => setSelectedTransaction(null)}
+        getCategoryName={getCategoryName}
       />
     </div>
   );
