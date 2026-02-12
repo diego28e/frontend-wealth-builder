@@ -227,7 +227,8 @@ export default function Accounts() {
                   </div>
                   <p className="text-xs text-gray-500 mt-1">Effective Annual Rate (E.A)</p>
                 </div>
-                <div className="flex items-center h-full pt-6">
+                <div className="flex items-center h-full pt-6 gap-6">
+                  {/* Tax Exempt Checkbox */}
                   <label className="flex items-center gap-3 cursor-pointer group">
                     <div className={`w-6 h-6 rounded-md border flex items-center justify-center transition-colors ${formData.is_tax_exempt ? 'bg-primary border-primary' : 'bg-white border-gray-300 group-hover:border-primary'}`}>
                       {formData.is_tax_exempt && <ShieldCheck size={16} className="text-white" />}
@@ -240,7 +241,24 @@ export default function Accounts() {
                     />
                     <div>
                       <span className="block text-sm font-bold text-gray-900">Tax Exempt</span>
-                      <span className="block text-xs text-gray-500">Exclude from automated tax calculations (e.g. 4x1000)</span>
+                      <span className="block text-xs text-gray-500">Exclude from automated tax (4x1000)</span>
+                    </div>
+                  </label>
+
+                  {/* Liquid Asset Checkbox */}
+                  <label className="flex items-center gap-3 cursor-pointer group">
+                    <div className={`w-6 h-6 rounded-md border flex items-center justify-center transition-colors ${formData.is_liquid ? 'bg-blue-500 border-blue-500' : 'bg-white border-gray-300 group-hover:border-blue-500'}`}>
+                      {formData.is_liquid && <ShieldCheck size={16} className="text-white" />}
+                    </div>
+                    <input
+                      type="checkbox"
+                      className="hidden"
+                      checked={formData.is_liquid}
+                      onChange={(e) => setFormData({ ...formData, is_liquid: e.target.checked })}
+                    />
+                    <div>
+                      <span className="block text-sm font-bold text-gray-900">Liquid Asset</span>
+                      <span className="block text-xs text-gray-500">Available immediately (e.g. Cash)</span>
                     </div>
                   </label>
                 </div>
